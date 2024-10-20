@@ -68,7 +68,6 @@ events.**
 **/lightning_logs/*
 **/.snakemake/
 
-data
 results
 other/
 build/
