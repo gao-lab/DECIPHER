@@ -1,7 +1,7 @@
 import numpy as np
 
-from spider.data.mnn_dataset import MNNDataset
-from spider.utils import CFG
+from decipher.data.mnn_dataset import MNNDataset
+from decipher.utils import CFG
 
 
 def test_MNNDataset(*args, **kwargs):

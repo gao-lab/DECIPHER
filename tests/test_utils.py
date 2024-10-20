@@ -1,7 +1,7 @@
 import numpy as np
 import scanpy as sc
 
-from spider.utils import scanpy_viz
+from decipher.utils import scanpy_viz
 
 
 def test_scanpy_viz(adata):

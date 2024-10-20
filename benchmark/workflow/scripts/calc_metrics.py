@@ -25,7 +25,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsTransformer
 from addict import Dict
 
-from spider.utils import scanpy_viz, estimate_spot_size
+from decipher.utils import scanpy_viz, estimate_spot_size
 
 import ray
 
@@ -45,14 +45,14 @@ time = float(time["run_time"])
 # ## Build anndata object
 
 # %%
-if 'search_spider' not in str(Path(center_emb).absolute()):
+if 'search_decipher' not in str(Path(center_emb).absolute()):
     h5ad_file = Path(center_emb).absolute().parent.parent / "data.h5ad"
 else:
     h5ad_file = Path(center_emb).absolute().parent.parent.parent / "data.h5ad"
 adata = sc.read_h5ad(h5ad_file)
 
 # %%
-if 'spider' not in str(Path(center_emb).absolute()):
+if 'decipher' not in str(Path(center_emb).absolute()):
     adata.obsm["X_center"] = np.load(center_emb)
     CLUSTER_KEYS = ["center"]
 else:

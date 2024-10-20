@@ -1,12 +1,12 @@
 import numpy as np
 import scanpy as sc
 
-from spider import Spider
-from spider.utils import CFG, GENESELECT_CFG, REGRESS_CFG, GetRunTime, global_seed
+from decipher import DECIPHER
+from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, GetRunTime, global_seed
 
 
 @GetRunTime
-def test_spider_omics_single(h5ad_path: str = None):
+def test_decipher_omics_single(h5ad_path: str = None):
     global_seed(0)
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 3
@@ -24,7 +24,7 @@ def test_spider_omics_single(h5ad_path: str = None):
     # random choose cell type from ['a', 'b', 'c']
     adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
 
-    model = Spider(work_dir="./results/spider_omics_single", user_cfg=CFG)
+    model = DECIPHER(work_dir="./results/decipher_omics_single", user_cfg=CFG)
     model.register_data(adata)
     model.fit_omics()
     model.visualize()
@@ -34,17 +34,17 @@ def test_spider_omics_single(h5ad_path: str = None):
 
 
 @GetRunTime
-def test_spider_omics_multi():
+def test_decipher_omics_multi():
     CFG.omics.model.epochs = 3
-    work_dir = "./results/spider_omics_multi"
+    work_dir = "./results/decipher_omics_multi"
     # adata1 = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
     # adata2 = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_2")
-    model = Spider(work_dir=work_dir, recover=True)
+    model = DECIPHER(work_dir=work_dir, recover=True)
     # model.register_data([adata1, adata2], group_list=["Section1", "Section2"])
     model.fit_omics()
     model.visualize()
 
 
 if __name__ == "__main__":
-    test_spider_omics_single()
-    # test_spider_omics_multi()
+    test_decipher_omics_single()
+    # test_decipher_omics_multi()

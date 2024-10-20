@@ -24,7 +24,7 @@ library(patchwork)
 
 # %% vscode={"languageId": "r"}
 data <- read_csv('../results/benchmark_results.csv')
-data$method <- factor(data$method, levels = c('spider', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
+data$method <- factor(data$method, levels = c('decipher', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
 
 # # replace ':' by '-' in all column names
 # data <- data %>% rename_all(~ gsub(":", "__", .))
@@ -98,7 +98,7 @@ ggbarplot(data, x="method", y='run_time', fill='method', color='method', add="me
 
 # %% vscode={"languageId": "r"}
 data <- read_csv('../results/benchmark_results.csv')
-data$method <- factor(data$method, levels = c('spider', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
+data$method <- factor(data$method, levels = c('decipher', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
 data <- data %>% filter(dataset == 'human_brainaging_merfish') %>% filter(method != 'harmony')
 
 head(data)
@@ -144,7 +144,7 @@ p_list[[1]] | p_list[[2]]
 
 # %% vscode={"languageId": "r"}
 data <- read_csv('../results/benchmark_results.csv')
-data$method <- factor(data$method, levels = c('spider', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
+data$method <- factor(data$method, levels = c('decipher', 'scvi', 'harmony', 'scanpy', 'banksy', 'stagate', 'slat'))
 data <- data %>% filter(dataset == 'human_breastcancer_xenium') %>% filter(method != 'harmony')
 
 

@@ -1,18 +1,18 @@
 
-rule search_spider:
+rule search_decipher:
     input:
         data = "{path}/data.h5ad",
-        script = "workflow/scripts/search_spider.py",
+        script = "workflow/scripts/search_decipher.py",
     output:
-        center_emb = "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/center_emb.npy",
-        nbr_emb = "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/nbr_emb.npy",
-        time = "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/time.yaml",
+        center_emb = "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/center_emb.npy",
+        nbr_emb = "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/nbr_emb.npy",
+        time = "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/time.yaml",
     params:
-        notebook_in = "workflow/scripts/search_spider.ipynb",
-        notebook_out = "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/search_spider.ipynb",
-        work_dir = "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}",
+        notebook_in = "workflow/scripts/search_decipher.ipynb",
+        notebook_out = "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/search_decipher.ipynb",
+        work_dir = "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}",
     log:
-        "{path}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/search_spider.log"
+        "{path}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/search_decipher.log"
     threads:8
     resources: gpu=1
     shell:

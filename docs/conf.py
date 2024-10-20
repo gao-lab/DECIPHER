@@ -46,10 +46,10 @@ autodoc_inherit_docstrings = True
 autodoc_default_options = {"autosummary": True}
 
 html_theme = "sphinx_rtd_theme"
-html_favicon = "_static/Spider.ico"
+# html_favicon = "_static/DECIPHER.ico"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-html_logo = "_static/Spider_logo.png"
+html_logo = "_static/DECIPHER_logo.png"
 
 
 intersphinx_mapping = dict(

@@ -1,5 +1,5 @@
 r"""
-Main class of `spider` package
+Main class of `decipher` package
 """
 
 from copy import deepcopy
@@ -29,7 +29,7 @@ from .plot import plot_sc
 from .utils import CFG, estimate_spot_size, global_seed, scanpy_viz, sync_config
 
 
-class Spider(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
+class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
     r"""
     Base class of model definition and training
 
@@ -43,7 +43,7 @@ class Spider(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
         if recover from a previous run
     """
 
-    def __init__(self, work_dir: str = "Spider", user_cfg: Dict = None, recover: bool = False):
+    def __init__(self, work_dir: str = "DECIPHER", user_cfg: Dict = None, recover: bool = False):
         self.work_dir = Path(work_dir)
         if self.work_dir.exists() and not recover:
             logger.warning(f"{self.work_dir} already exists but `recover` is False.")

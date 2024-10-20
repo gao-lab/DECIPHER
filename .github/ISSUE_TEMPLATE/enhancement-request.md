@@ -1,6 +1,6 @@
 ---
 name: Enhancement request
-about: Anything you’d like to see in Spider?
+about: Anything you’d like to see in DECIPHER?
 title: ''
 labels: enhancement
 assignees: ''

@@ -18,7 +18,7 @@ import time
 
 import yaml
 import scanpy as sc
-from spider import Spider, CFG
+from decipher import DECIPHER, CFG
 
 # %% tags=["parameters"]
 # parameter tag
@@ -64,7 +64,7 @@ else:
 
 # %%
 start = time.time()
-model = Spider(work_dir=work_dir, user_cfg=CFG)
+model = DECIPHER(work_dir=work_dir, user_cfg=CFG)
 model.register_data(adata, split_by=split_by)
 model.fit_omics()
 run_time = str(time.time() - start)

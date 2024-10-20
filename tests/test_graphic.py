@@ -1,7 +1,7 @@
 import numpy as np
 
-from spider.graphic.knn import knn, knn_cuml
-from spider.utils import GetRunTime
+from decipher.graphic.knn import knn, knn_cuml
+from decipher.utils import GetRunTime
 
 
 @GetRunTime

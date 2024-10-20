@@ -7,10 +7,10 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy Spider package and install
+# Copy DECIPHER package and install
 USER rapids
 WORKDIR /app
-COPY ./spider ./spider
+COPY ./decipher ./decipher
 COPY ./README.md ./README.md
 COPY ./pyproject.toml ./pyproject.toml
 RUN pip --no-cache-dir install -e "." && install_pyg_dependencies && rm -rf /tmp/*

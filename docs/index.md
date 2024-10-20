@@ -2,15 +2,15 @@
 :end-line: 5
 ```
 
-# Spider: Spatial-omics data embedding and analysis
+# DECIPHER: Spatial-omics data embedding and analysis
 ```{eval-rst}
-.. .. image:: _static/Spider.png
+.. .. image:: _static/DECIPHER.png
 ..    :width: 80
-..    :alt: Spider icon
+..    :alt: DECIPHER icon
 ..    :align: right
 ```
 
-``spider`` package implements the **Spider** model.
+``decipher`` package implements the **DECIPHER** model ([Github](https://github.com/gao-lab/DECIPHER)).
 
 ```{eval-rst}
 .. image:: _static/Model.png
@@ -19,8 +19,8 @@
 ```
 
 
-## Getting started with Spider
-To get started with ``spider``, check out our **{doc}`installation guide <install>`** and **{doc}`tutorials <tutorials>`**.
+## Getting started with DECIPHER
+To get started, check out our **{doc}`installation guide <install>`** and **{doc}`tutorials <tutorials>`**.
 
 
 ## Manuscript
@@ -44,4 +44,4 @@ Please check our manuscript for more details:
 ```
 
 ## Contributing
-We are happy about your contributions! Please submit Issue or Pull requests on our [Github Repo](https://github.com/gao-lab/Spider). We think your contribution will make a big difference to community!
+We are happy about your contributions! Please submit Issue or Pull requests on our [Github](https://github.com/gao-lab/DECIPHER). We think your contribution will make a big difference to community!

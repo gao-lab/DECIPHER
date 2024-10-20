@@ -1,5 +1,5 @@
 __default__:
-  jobname: "Spider-{rule}"
+  jobname: "DECIPHER-{rule}"
   output: ".slurm/{rule}.out"
   error: ".slurm/{rule}.err"
   account: gaog_g1
@@ -10,7 +10,7 @@ __default__:
   qos: gaogcns
   gres: ""
 
-run_spider:
+run_decipher:
   partition: gpu_4l
   qos: gaogg4c
   gres: "--gres=gpu:1"
@@ -25,7 +25,7 @@ run_scvi:
   qos: gaogg4c
   gres: "--gres=gpu:1"
 
-search_spider:
+search_decipher:
   partition: gpu_4l
   qos: gaogg4c
   gres: "--gres=gpu:1"

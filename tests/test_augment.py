@@ -4,7 +4,7 @@ from loguru import logger
 from pytest import mark
 from torch_geometric.data import Data
 
-from spider.data.augment import OmicsSpatialAugment
+from decipher.data.augment import OmicsSpatialAugment
 
 config = Dict(
     {
@@ -16,9 +16,7 @@ config = Dict(
 edge_index = torch.tensor([[0, 1, 2, 3, 4, 5], [1, 2, 0, 3, 5, 13]], dtype=torch.long)
 batch = torch.tensor([0, 1, 0, 0, 1, 1], dtype=torch.long)
 n_id = torch.range(0, 5, dtype=torch.long)
-g_omics = Data(
-    x=torch.rand(6, 10), batch=batch, edge_index=edge_index, batch_size=2, n_id=n_id
-)
+g_omics = Data(x=torch.rand(6, 10), batch=batch, edge_index=edge_index, batch_size=2, n_id=n_id)
 
 
 @mark.parametrize("config,edge_index,x", [(config, edge_index, g_omics)])

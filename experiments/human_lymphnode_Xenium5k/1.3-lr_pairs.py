@@ -21,8 +21,8 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 
-from spider.utils import estimate_spot_size
-from spider.graphic.build import build_graph
+from decipher.utils import estimate_spot_size
+from decipher.graphic.build import build_graph
 
 # %%
 adata = sc.read_h5ad('./data/lymph_node.h5ad')

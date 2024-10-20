@@ -4,17 +4,17 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
-name = "spider"
-packages = [{include = "spider"}]
+name = "cell-decipher"
+packages = [{include = "decipher"}]
 version = "0.1.0"
 description = "Spatial-omics data embedding and analysis"
 readme = "README.md"
 license = "MIT"
 authors = ["Chen-Rui Xia <xiachenrui@mail.cbi.pku.edu.cn>"]
 keywords = ["bioinformatics", "transformer", "single-cell", "spatial-omics", "deep-learning"]
-homepage = "https://github.com/gao-lab/spider"
-documentation = "https://spider.readthedocs.io/en/latest/"
-repository = "https://github.com/gao-lab/spider"
+homepage = "https://github.com/gao-lab/decipher"
+documentation = "https://decipher.readthedocs.io/en/latest/"
+repository = "https://github.com/gao-lab/decipher"
 classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
@@ -94,7 +94,7 @@ dev = ["pytest", "pytest-sugar", "pytest-cov", "pytest-xdist",
         "pre-commit", "black", "isort", "py-spy", "bokeh", "datatable", "parse", "kaleido"]
 
 [tool.pyright]
-include = ["spider"]
+include = ["decipher"]
 exclude = ["**/conda", "**/__pycache__", "**/.**"]
 ignore = ["resource/"]
 
@@ -102,15 +102,15 @@ ignore = ["resource/"]
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["spider"]
+source = ["decipher"]
 
 [tool.coverage.report]
 show_missing = true
 
 [tool.poetry.scripts]
-spider_ddp_sc = "spider.ddp:spider_ddp_sc"
-spider_ddp_spatial = "spider.ddp:spider_ddp_spatial"
-install_pyg_dependencies = "spider.utils:install_pyg_dep"
+decipher_ddp_sc = "decipher.ddp:decipher_ddp_sc"
+decipher_ddp_spatial = "decipher.ddp:decipher_ddp_spatial"
+install_pyg_dependencies = "decipher.utils:install_pyg_dep"
 
 [tool.jupytext]
 formats = "ipynb,py:percent"

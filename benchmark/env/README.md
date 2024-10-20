@@ -8,8 +8,8 @@ mamba create -p ./conda -y -c conda-forge -c rapidsai -c nvidia -c bioconda pyth
 rapids=24.04 cuda-version=11.8 cudnn cutensor cusparselt \
 snakemake==7.32.4 && conda activate ./conda
 
-# spider & scanpy
-# cd /path/to/spider
+# decipher & scanpy
+# cd /path/to/decipher
 pip install '.[dev]'
 install_pyg_dependencies
 

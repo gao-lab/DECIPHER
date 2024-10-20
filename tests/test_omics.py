@@ -1,8 +1,8 @@
 import scanpy as sc
 
-from spider.emb import spatial_emb
-from spider.graphic.build import build_graph
-from spider.utils import CFG, sync_config
+from decipher.emb import spatial_emb
+from decipher.graphic.build import build_graph
+from decipher.utils import CFG, sync_config
 
 
 def test_omics_contrastive(adata):
@@ -17,6 +17,4 @@ def test_omics_contrastive(adata):
 
 
 if __name__ == "__main__":
-    test_omics_contrastive(
-        sc.read_h5ad("../data/processed/human/pbmc/mimic/pbmc3k/adata.h5ad")
-    )
+    test_omics_contrastive(sc.read_h5ad("../data/processed/human/pbmc/mimic/pbmc3k/adata.h5ad"))

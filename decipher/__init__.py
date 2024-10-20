@@ -1,5 +1,5 @@
 r"""
-`Spider` package for spatial omics data independent embedding
+`DECIPHER` package for spatial omics data independent embedding
 """
 
 import warnings
@@ -22,9 +22,9 @@ ignore_warnings = [
 for ignore_warning in ignore_warnings:
     warnings.filterwarnings("ignore", message=f".*{ignore_warning}.*")
 
-from .cls import Spider  # noqa
+from .cls import DECIPHER  # noqa
 from .utils import CFG  # noqa
 
-name = "Spider"
+name = "cell-decipher"
 __version__ = version(name)
 __author__ = "Chen-Rui Xia"

@@ -1,6 +1,6 @@
 import scanpy as sc
 
-from spider import Spider, CFG
+from decipher import DECIPHER, CFG
 
 
 CFG.omics.model.epochs = 6
@@ -11,7 +11,7 @@ CFG.omics.loader.batch_size = 256
 adata = sc.read_h5ad("./data/merged_adata.h5ad")
 
 # fit model
-model = Spider(work_dir="./results/spider_merged_6_28", user_cfg=CFG)
+model = DECIPHER(work_dir="./results/decipher_merged_6_28", user_cfg=CFG)
 model.register_data(adata, cell_type="cell_type", preprocess=False)
 model.fit_omics()
 

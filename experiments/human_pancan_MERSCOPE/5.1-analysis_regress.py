@@ -21,7 +21,7 @@ from scipy import stats
 
 
 # %%
-df = pd.read_csv('./results/spider_6_10/explain/explain_results.csv', index_col=0)
+df = pd.read_csv('./results/decipher_6_10/explain/explain_results.csv', index_col=0)
 df['experiment'] = df.index
 df['cell_type'] = df.index.str.split('celltype:').str[-1]
 df['batch'] = df.index.str.split('_cell').str[0].str.split(':').str[1]

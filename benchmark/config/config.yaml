@@ -23,7 +23,7 @@ dataset:
 
 #--------------------------- Benchmark Methods -----------------------------#
 method:
-  - spider
+  - decipher
   # # spatial
   - banksy
   - stagate

@@ -12,7 +12,7 @@ All datasets used in benchmark are public available. Here is a summary:
 
 
 ## Methods
-- Spider
+- DECIPHER
 - SLAT
 - BANKSY
 - STAGATE
@@ -24,7 +24,7 @@ All datasets used in benchmark are public available. Here is a summary:
 ## Reproducibility
 
 ### Setup environment
-Following the [guide](./env/README.md). You can also check absolute version of install packages in [conda.yaml](env/conda.yaml) file.
+Follow the [guide](./env/README.md) to set up the environment. The absolute version of packages is also provided in [conda.yaml](env/conda.yaml).
 
 ### Prepare data
 
@@ -32,7 +32,7 @@ Download the datasets and move them into `./input` folder.
 
 ### Run the workflow in slurm cluster
 
-> Take about 12 hours when using 4 GPU nodes (64 cores, 1TB mem and 8 A100-GPUs).
+> Take about 12 hours when using 32 A100 GPUs.
 
 We use `snakemake` to run benchmark workflows in Slurm cluster. Firstly, you need modify `partition` name in [`config`](./profiles/hpc/hpc.yaml) according to your cluster settings, then run:
 

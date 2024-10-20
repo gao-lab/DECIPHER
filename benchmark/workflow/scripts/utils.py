@@ -107,7 +107,7 @@ def target_hyper_search_files(config):
     #     conf_expand_pattern(hyperparam_conf, placeholder="default"), **hyperparam_conf
     # )
     # pool = expand(
-    #     "results/{dataset}/seed:{seed}/search_spider/{hyperparam_conf}/metrics.yaml",
+    #     "results/{dataset}/seed:{seed}/search_decipher/{hyperparam_conf}/metrics.yaml",
     #     dataset=config["dataset"].keys(),
     #     seed=seeds,
     #     hyperparam_conf=hyperparam_conf,
@@ -125,6 +125,6 @@ def target_hyper_search_files(config):
             )
             for conf in hyperparam_conf_dataset:
                 pool.append(
-                    f"results/{dataset}/seed:{seed}/search_spider/{conf}/metrics.yaml"
+                    f"results/{dataset}/seed:{seed}/search_decipher/{conf}/metrics.yaml"
                 )
     return filter_pool(pool)

@@ -21,7 +21,7 @@ import torch
 import scanpy as sc
 import numpy as np
 from torch_geometric.nn import SimpleConv
-from spider.graphic.build import build_graph
+from decipher.graphic.build import build_graph
 from sklearn.preprocessing import LabelEncoder
 
 # %% tags=["parameters"]

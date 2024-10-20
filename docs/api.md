@@ -1,6 +1,6 @@
 # API documentation
 
-This section provides detailed API documentation for all public functions and classes in ``spider``.
+This section provides detailed API documentation for all public functions and classes in ``decipher``.
 
 
 ```{eval-rst}
@@ -9,11 +9,11 @@ This section provides detailed API documentation for all public functions and cl
    :template: module.rst
    :recursive:
 
-   spider
+   decipher
 
 ```
 
 
 ```{note}
-View full codes on [github](https://github.com/gao-lab/Spider)
+View full codes on [github](https://github.com/gao-lab/DECIPHER)
 ```

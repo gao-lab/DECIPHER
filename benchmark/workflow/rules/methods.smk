@@ -1,18 +1,18 @@
 
-rule run_spider:
+rule run_decipher:
     input:
         data = "{path}/data.h5ad",
-        script = "workflow/scripts/run_spider.py",
+        script = "workflow/scripts/run_decipher.py",
     output:
-        center_emb = "{path}/spider/center_emb.npy",
-        nbr_emb = "{path}/spider/nbr_emb.npy",
-        time = "{path}/spider/time.yaml",
+        center_emb = "{path}/decipher/center_emb.npy",
+        nbr_emb = "{path}/decipher/nbr_emb.npy",
+        time = "{path}/decipher/time.yaml",
     params:
-        notebook_in = "workflow/scripts/run_spider.ipynb",
-        notebook_out = "{path}/spider/run_spider.ipynb",
-        work_dir = "{path}/spider",
+        notebook_in = "workflow/scripts/run_decipher.ipynb",
+        notebook_out = "{path}/decipher/run_decipher.ipynb",
+        work_dir = "{path}/decipher",
     log:
-        "{path}/spider/run_spider.log",
+        "{path}/decipher/run_decipher.log",
     threads:8
     resources: gpu=1
     shell:

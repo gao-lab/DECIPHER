@@ -4,10 +4,10 @@ import scanpy as sc
 import torch
 from torch_geometric.data import Batch, Data
 
-from spider.explain.gene.gene_selection import train_GAE
-from spider.explain.gene.lr import get_lr_expr
-from spider.explain.regress.mixin import train_regress
-from spider.utils import GENESELECT_CFG, REGRESS_CFG
+from decipher.explain.gene.gene_selection import train_GAE
+from decipher.explain.gene.lr import get_lr_expr
+from decipher.explain.regress.mixin import train_regress
+from decipher.utils import GENESELECT_CFG, REGRESS_CFG
 
 
 def test_GAE_mimic():

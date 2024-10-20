@@ -1,7 +1,7 @@
 import scanpy as sc
 
-from spider.emb import sc_emb
-from spider.utils import CFG, sync_config
+from decipher.emb import sc_emb
+from decipher.utils import CFG, sync_config
 
 
 def test_sc_plain(adata):

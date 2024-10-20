@@ -10,7 +10,7 @@ localrules:
     summary_benchmark,
     summary_hyper_search,
     link_data,
-    # run_spider,
+    # run_decipher,
     # run_scvi,
     # run_stagate,
     # calc_metrics,
@@ -40,7 +40,7 @@ rule summary_hyper_search:
     output:
         "results/hyper_search.csv",
     params:
-        pattern=lambda wildcards: "results/{dataset}/seed:{seed}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/metrics.yaml"
+        pattern=lambda wildcards: "results/{dataset}/seed:{seed}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}-batch_size:{batch_size}/metrics.yaml"
     threads: 1
     script:
         "scripts/summarize.py"

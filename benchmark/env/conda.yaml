@@ -628,7 +628,7 @@ dependencies:
       - seaborn==0.13.2
       - session-info==1.0.0
       - spagcn==1.2.7
-      - spider==0.1.0
+      - decipher==0.1.0
       - stack-data==0.6.3
       - stagate-pyg==1.0.0
       - statsmodels==0.14.2

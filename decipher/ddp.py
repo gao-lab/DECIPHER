@@ -47,14 +47,14 @@ class DDPMixin:
             self.update_config({"device_num": gpus})
             # DDP fit omics
             subprocess.run(
-                [f"spider_ddp_sc --work_dir {str(self.work_dir)}"], shell=True, check=True
+                [f"decipher_ddp_sc --work_dir {str(self.work_dir)}"], shell=True, check=True
             )
         else:
             self.fit_sc()
             self.update_config({"device_num": gpus})
         # DDP fit spatial
         subprocess.run(
-            [f"spider_ddp_spatial --work_dir {str(self.work_dir)}"], shell=True, check=True
+            [f"decipher_ddp_spatial --work_dir {str(self.work_dir)}"], shell=True, check=True
         )
         self.inference_spaital()
         logger.success("DDP training finished.")
@@ -123,17 +123,17 @@ class DDPMixin:
 
 @command()
 @option("--work_dir", help="work directory", required=True, type=str)
-def spider_ddp_spatial(work_dir):
-    from spider import Spider
+def decipher_ddp_spatial(work_dir):
+    from decipher import DECIPHER
 
-    model = Spider(work_dir, recover=True)
+    model = DECIPHER(work_dir, recover=True)
     model.fit_spatial()
 
 
 @command()
 @option("--work_dir", help="work directory", required=True, type=str)
-def spider_ddp_sc(work_dir):
-    from spider import Spider
+def decipher_ddp_sc(work_dir):
+    from decipher import DECIPHER
 
-    model = Spider(work_dir, recover=True)
+    model = DECIPHER(work_dir, recover=True)
     model.fit_sc()

@@ -205,7 +205,7 @@ def load_sc_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
 
 def load_spatial_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
     r"""
-    Load spider spatial model
+    Load decipher spatial model
 
     Parameters
     ----------

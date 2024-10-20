@@ -20,7 +20,7 @@
 import scanpy as sc
 import pandas as pd
 import rapids_singlecell as rsc
-from spider.utils import gex_embedding, clip_umap, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER
+from decipher.utils import gex_embedding, clip_umap, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER
 
 # %%
 adata = sc.read_10x_h5('./data/Xenium_Prime_Human_Lymph_Node_Reactive_FFPE_outs/cell_feature_matrix.h5')

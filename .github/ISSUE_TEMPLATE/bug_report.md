@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Spider doesn’t do what it should? Please help us fix it!
+about: DECIPHER doesn’t do what it should? Please help us fix it!
 title: ''
 labels: bug
 assignees: ''
@@ -8,8 +8,8 @@ assignees: ''
 
 ### Please ensure:
 
-- [ ] I have confirmed this bug exists on the **latest** version of Spider. See https://github.com/gao-lab/spider
-- [ ] I follow the tutorial from the [Spider tutorial](https://github.com/gao-lab/spider).
+- [ ] I have confirmed this bug exists on the **latest** version of DECIPHER. See https://github.com/gao-lab/decipher
+- [ ] I follow the tutorial from the [DECIPHER tutorial](https://github.com/gao-lab/decipher).
 
 -----------
 
@@ -24,7 +24,7 @@ assignees: ''
 - Python version: <!-- e.g. 3.9.1 -->
 - Torch version: <!-- e.g. 2.0.1 -->
 - Pytorch geometric version: <!-- e.g. 2.3.0 -->
-- Spider version: <!-- e.g. 0.1.0 -->
+- DECIPHER version: <!-- e.g. 0.1.0 -->
 - Others: <!-- Other unconventional env setup -->
 
 **Data information:**

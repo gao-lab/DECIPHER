@@ -21,8 +21,8 @@ def parse_args() -> Namespace:
 
 def debug() -> Dict:
     args = Dict()
-    args.input = ["results/human_pbmc_10x_mimic/seed:0/search_spider/dropout_gex:0.5-k:40-center_emb_dim:128-nbr_emb_dim:32-epochs:6-dropout:0.1-transformer_layers:3-temperature_center:0.07-temperature_nbr:0.07/metrics.yaml"]
-    args.params.pattern = "results/{dataset}/seed:{seed}/search_spider/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}/metrics.yaml"
+    args.input = ["results/human_pbmc_10x_mimic/seed:0/search_decipher/dropout_gex:0.5-k:40-center_emb_dim:128-nbr_emb_dim:32-epochs:6-dropout:0.1-transformer_layers:3-temperature_center:0.07-temperature_nbr:0.07/metrics.yaml"]
+    args.params.pattern = "results/{dataset}/seed:{seed}/search_decipher/dropout_gex:{dropout_gex}-k:{k}-center_emb_dim:{center_emb_dim}-nbr_emb_dim:{nbr_emb_dim}-epochs:{epochs}-dropout:{dropout}-transformer_layers:{transformer_layers}-temperature_center:{temperature_center}-temperature_nbr:{temperature_nbr}/metrics.yaml"
     args.output = ""
     return args
 

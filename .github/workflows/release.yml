@@ -75,4 +75,4 @@ jobs:
           context: .
           dockerfile: ./Dockerfile
           push: true
-          tags: huhansan666666/spider:latest
+          tags: huhansan666666/decipher:latest

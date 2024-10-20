@@ -1,5 +1,5 @@
 __default__:
-  jobname: "Spider-{rule}"
+  jobname: "DECIPHER-{rule}"
   output: ".slurm/{rule}.out"
   error: ".slurm/{rule}.err"
   account: gglab
@@ -9,7 +9,7 @@ __default__:
   n_cpu: "{threads}"
   gres: ""
 
-run_spider:
+run_decipher:
   partition: gpu32,gpu2
   gres: "--gres=gpu:1"
 
@@ -21,6 +21,6 @@ run_scvi:
   partition: gpu32,gpu2
   gres: "--gres=gpu:1"
 
-search_spider:
+search_decipher:
   partition: gpu32,gpu2
   gres: "--gres=gpu:1"

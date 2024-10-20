@@ -61,7 +61,7 @@ OTHER_MARKER = [
 
 CFG = Dict()
 CFG.seed = 0
-CFG.work_dir = "Spider"
+CFG.work_dir = "DECIPHER"
 CFG.device = "gpu" if torch.cuda.is_available() else "cpu"
 CFG.device_num = 1
 
