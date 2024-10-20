@@ -1,0 +1,11 @@
+_build
+._*
+api
+!*.ipynb
+!_templates/
+!_templates/**
+!Makefile
+!requirements.txt
+!_static/*.png
+!_static/*/*.png
+._*

@@ -1,0 +1,31 @@
+__default__:
+  jobname: "Spider-{rule}"
+  output: ".slurm/{rule}.out"
+  error: ".slurm/{rule}.err"
+  account: gaog_g1
+  partition: cn-short
+  n_node: 1
+  n_task: 1
+  n_cpu: "{threads}"
+  qos: gaogcns
+  gres: ""
+
+run_spider:
+  partition: gpu_4l
+  qos: gaogg4c
+  gres: "--gres=gpu:1"
+
+run_stagate:
+  partition: gpu_4l
+  qos: gaogg4c
+  gres: "--gres=gpu:1"
+
+run_scvi:
+  partition: gpu_4l
+  qos: gaogg4c
+  gres: "--gres=gpu:1"
+
+search_spider:
+  partition: gpu_4l
+  qos: gaogg4c
+  gres: "--gres=gpu:1"

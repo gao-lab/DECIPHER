@@ -1,0 +1,39 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ 3.11 ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libxml2-utils pandoc
+          curl -sSL https://install.python-poetry.org | python3 -
+          pip install --upgrade pip
+          pip install -e ".[docs, dev]"
+          install_pyg_dependencies
+
+      - name: Build documentation
+        run: |
+          sphinx-build -b html docs docs/_build

@@ -1,0 +1,125 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+name = "spider"
+packages = [{include = "spider"}]
+version = "0.1.0"
+description = "Spatial-omics data embedding and analysis"
+readme = "README.md"
+license = "MIT"
+authors = ["Chen-Rui Xia <xiachenrui@mail.cbi.pku.edu.cn>"]
+keywords = ["bioinformatics", "transformer", "single-cell", "spatial-omics", "deep-learning"]
+homepage = "https://github.com/gao-lab/spider"
+documentation = "https://spider.readthedocs.io/en/latest/"
+repository = "https://github.com/gao-lab/spider"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+numpy = ">1.21, <2.0"
+scipy = ">1.3, <1.14"
+scanpy = ">=1.9"
+pynndescent = ">=0.5"
+pyyaml = "*"
+plotly = ">=5.18"
+pynvml = ">=11.5"
+scikit-misc = ">=0.3"
+leidenalg = "*"
+addict = "<2.4.0"
+loguru = "*"
+faiss-cpu = "*"
+annoy = "*"
+ray = {version = "*", extras = ["default"]}
+ipython = "*"
+
+torch = ">=2.0, <2.4"
+torchvision = "*"
+torchaudio = "*"
+pytorch-lightning = ">=2.1, <2.4"
+torch_geometric = ">=2.3.0, <2.6"
+tensorboard = "*"
+einops = "*"
+lightly = "*"
+harmony-pytorch = "*"
+rapids_singlecell = "*"
+
+sphinx = {version = "<=6.2.1", optional = true}
+sphinx-autodoc-typehints = {version = "*", optional = true}
+sphinx-copybutton = {version = "*", optional = true}
+sphinx-intl = {version = "*", optional = true}
+nbsphinx = {version = "*", optional = true}
+sphinx-rtd-theme = {version = "*", optional = true}
+sphinx_gallery = {version = ">=0.8.2, <0.11", optional = true}
+jinja2 = {version = "*", optional = true}
+myst-parser = {version = "*", optional = true}
+
+pytest = {version = "*", optional = true}
+pytest-sugar = {version = "*", optional = true}
+pytest-cov = {version = "*", optional = true}
+pytest-xdist = {version = "*", optional = true}
+papermill = {version = "*", optional = true}
+jupyter = {version = "*", optional = true}
+jupyter_contrib_nbextensions = {version = "*", optional = true}
+jupytext = {version = "*", optional = true}
+ipykernel = {version = "*", optional = true}
+nbformat = {version = "*", optional = true}
+pre-commit = {version = "*", optional = true}
+black = {version = "*", optional = true}
+isort = {version = "*", optional = true}
+py-spy = {version = "*", optional = true}
+bokeh = {version = "*", optional = true}
+datatable = {version = "*", optional = true}
+parse = {version = "*", optional = true}
+kaleido = {version = "*", optional = true}
+
+[tool.poetry.extras]
+docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-intl",
+        "nbsphinx", "sphinx-rtd-theme", "sphinx_gallery", "jinja2", "myst-parser"]
+dev = ["pytest", "pytest-sugar", "pytest-cov", "pytest-xdist",
+        "papermill", "jupyter","jupyter_contrib_nbextensions", "ipykernel", "nbformat", "jupytext",
+        "pre-commit", "black", "isort", "py-spy", "bokeh", "datatable", "parse", "kaleido"]
+
+[tool.pyright]
+include = ["spider"]
+exclude = ["**/conda", "**/__pycache__", "**/.**"]
+ignore = ["resource/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["spider"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.poetry.scripts]
+spider_ddp_sc = "spider.ddp:spider_ddp_sc"
+spider_ddp_spatial = "spider.ddp:spider_ddp_spatial"
+install_pyg_dependencies = "spider.utils:install_pyg_dep"
+
+[tool.jupytext]
+formats = "ipynb,py:percent"
+
+[tool.black]
+line-length = 100
+
+[tool.flake8]
+max-line-length = 100
+
+[tool.isort]
+line_length = 100
