@@ -1,4 +1,4 @@
-<!-- [![stars-badge](https://img.shields.io/github/stars/gao-lab/DECIPHER?logo=GitHub&color=yellow)](https://github.com/gao-lab/DECIPHER/stargazers) -->
+[![stars-badge](https://img.shields.io/github/stars/gao-lab/DECIPHER?logo=GitHub&color=yellow)](https://github.com/gao-lab/DECIPHER/stargazers)
 [![build-badge](https://github.com/gao-lab/DECIPHER/actions/workflows/build.yml/badge.svg)](https://github.com/gao-lab/DECIPHER/actions/workflows/build.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![license-badge](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,7 +8,7 @@
 # DECIPHER
 <div align="center">
 
-[Installation](#Installation) • [Documentation](#Documentation) • [Manuscript](#Manuscript) • [FAQ](#FAQ) • [Acknowledgement](#Acknowledgement)
+[Installation](#Installation) • [Documentation](#Documentation) • [Citation](#Citation) • [FAQ](#FAQ) • [Acknowledgement](#Acknowledgement)
 
 </div>
 
@@ -18,7 +18,7 @@
 
 ## Installation
 > [!IMPORTANT]
-> Requires Python >= 3.10 and CUDA-enabled GPU (not recommend using CPU because it‘s too slow).
+> Requires Python >= 3.10 and CUDA-enabled GPU (CPU-only device is not recommended).
 
 ### PyPI
 We recommend to install `cell-decipher` to a new conda environment with [RAPIDS](https://docs.rapids.ai/install) dependencies.
@@ -36,7 +36,10 @@ docker pull huhansan666666/decipher:latest
 ```
 
 ## Documentation
-Here is a minimal example for quick start. Please check our [**documentation**](https://slat.readthedocs.io/en/latest/) for advanced tutorials.
+> Please check [**documentation**](https://slat.readthedocs.io/en/latest/) for detailed tutorial.
+
+### Minimal example
+Here is a minimal example for quick start:
 
 ```python
 import scanpy as sc
@@ -57,7 +60,17 @@ omics_emb = model.center_emb
 spatial_emb = model.nbr_emb
 ```
 
-## Manuscript
+### Demo
+
+| Name                                    | Description                                                  |
+| --------------------------------------- | ------------------------------------------------------------ |
+| [Basic Model Tutorial]() ([Colab](https://colab.research.google.com/drive/14PEtrgqlf-KbLOTfBLc9gbx0YvY6mi0S?usp=sharing))                | Tutorial on how to train DECIPHER                            |
+| [Identify Localization Related Genes]() | Tutorial on how to identify cells’ localization related genes via DECIPHER embeddings|
+| [Multi-slices with Batch Effects]()     | Tutorial on how to remove batch effects across multiple slices |
+| [DDP Training]()                        | Tutorial on how to use multi-GPUs on large datasets          |
+
+
+## Citation
 TBD
 
 > If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/README.md) and [**experiments**](./experiments/README.md) folder.
