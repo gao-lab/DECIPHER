@@ -1,0 +1,26 @@
+__default__:
+  jobname: "DECIPHER-{rule}"
+  output: ".slurm/{rule}.out"
+  error: ".slurm/{rule}.err"
+  account: gglab
+  partition: cpu1,cpu2,cpu3,fat
+  n_node: 1
+  n_task: 1
+  n_cpu: "{threads}"
+  gres: ""
+
+run_decipher:
+  partition: gpu32,gpu2
+  gres: "--gres=gpu:1"
+
+run_stagate:
+  partition: gpu32,gpu2
+  gres: "--gres=gpu:1"
+
+run_scvi:
+  partition: gpu32,gpu2
+  gres: "--gres=gpu:1"
+
+search_decipher:
+  partition: gpu32,gpu2
+  gres: "--gres=gpu:1"
