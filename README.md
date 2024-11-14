@@ -12,7 +12,7 @@
 
 </div>
 
-`DECIPHER` aims to learn cells’ disentangled embeddings from intracellular state and extracellular context views based on spatial omics data.
+`DECIPHER` aims to learn cells’ disentangled intracellular molecular identity embedding and extracellular spatial context embedding from spatial omics data.
 
 ![DECIPHER](./docs/_static/Model.png)
 
@@ -73,7 +73,7 @@ sc.pl.umap(adata, color=['region'])
 ```
 
 ### Tutorials
-<!-- > Please check [**documentation**](https://slat.readthedocs.io/en/latest/) for all tutorials. -->
+> Please check [**documentation**](https://cell-decipher.readthedocs.io/en/latest) for all tutorials.
 
 | Name                                    | Description                                                  | Colab                                                        |
 | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
