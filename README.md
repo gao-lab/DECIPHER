@@ -84,11 +84,13 @@ sc.pl.umap(adata, color=['region'])
 
 
 ## Citation
-In preparation.
+In coming.
 
 > If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/README.md) and [**experiments**](./experiments/README.md) folder.
 
 ## FAQ
+> Please open a new [github issue](https://github.com/gao-lab/DECIPHER/issues/new/choose) if you meeting problem.
+
 1. `CUDA out of memory` error
 
 The `model.train_gene_select()` function in [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) tutorial (~700k cells and 1k LRs) uses ~40G GPU memory. If your GPU do not have enough memory, you still can train model on GPU but disabling GPU in `train_gene_select()` function.
