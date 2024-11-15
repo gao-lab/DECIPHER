@@ -10,7 +10,7 @@
 ..    :align: right
 ```
 
-``decipher`` package implements the **DECIPHER** model ([Github](https://github.com/gao-lab/DECIPHER)).
+``cell-decipher`` package implements the **DECIPHER** model ([Github](https://github.com/gao-lab/DECIPHER)).
 
 ```{eval-rst}
 .. image:: _static/Model.png

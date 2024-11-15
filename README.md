@@ -61,8 +61,8 @@ model.register_data(adata)
 model.fit_omics()
 
 # Clustering disentangled embeddings
-adata.obsm['X_center'] = model.center_emb  # intracellular embedding
-adata.obsm['X_nbr'] =  model.nbr_emb  # context embedding
+adata.obsm['X_center'] = model.center_emb  # intracellular molecular embedding
+adata.obsm['X_nbr'] =  model.nbr_emb  # spatial context embedding
 adata = scanpy_viz(adata, ['center', 'nbr'], rapids=False)
 
 # Plot
@@ -89,18 +89,18 @@ In coming.
 > If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/README.md) and [**experiments**](./experiments/README.md) folder.
 
 ## FAQ
-> Please open a new [github issue](https://github.com/gao-lab/DECIPHER/issues/new/choose) if you meeting problem.
+> Please open a new [github issue](https://github.com/gao-lab/DECIPHER/issues/new/choose) if you meet problem.
 
 1. `CUDA out of memory` error
 
-The `model.train_gene_select()` function in [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) tutorial (~700k cells and 1k LRs) uses ~40G GPU memory. If your GPU do not have enough memory, you still can train model on GPU but disabling GPU in `train_gene_select()` function.
+The `model.train_gene_select()` function in [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) tutorial (~700k cells and 1k LRs) uses ~40G GPU memory. If your GPU device do not have enough memory, you still can train model on GPU but set `use_gpu=False` in `model.train_gene_select()`.
 
 2. Visium or ST data
 
-DECIPHER is designed for single cell resolution data. As for Visium or ST, DECIPHER still can be applied after obtaining single-cell resolution through deconvolution or spatial mapping strategies.
+DECIPHER is designed for single cell resolution data. As for Visium or ST, you can still use DECIPHER after obtaining single-cell resolution through deconvolution or spatial mapping strategies.
 
 ## Acknowledgement
-We thank following great open-source projects for their help or inspiration:
+We thank the following great open-source projects for their help or inspiration:
 
 - [vit-pytorch](https://github.com/lucidrains/vit-pytorch)
 - [lightly](https://github.com/lightly-ai/lightly)
