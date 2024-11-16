@@ -7,8 +7,8 @@ build:
     - pandoc
   jobs:
     post_create_environment:
-      - pip install torch==2.0.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
       - pip install cell-decipher
+      - pip install torch==2.0.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
       - pip --no-cache-dir install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.0+cpu.html
 sphinx:
   configuration: docs/conf.py
