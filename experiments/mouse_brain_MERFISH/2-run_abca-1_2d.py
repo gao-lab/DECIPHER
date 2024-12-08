@@ -1,6 +1,6 @@
 import scanpy as sc
 import torch
-from decipher import CFG, DECIPHER
+from spider import CFG, Spider
 
 # set the parameters
 CFG.omics.pretrain.epochs = 2
@@ -12,7 +12,7 @@ CFG.omics.model.plot = False
 CFG.omics.ignore_batch = True
 
 
-model = DECIPHER(work_dir="./results/decipher_abca-1_2d_0705", user_cfg=CFG)
+model = Spider(work_dir="./results/spider_abca-1_2d_0705", user_cfg=CFG)
 
 # read in data
 adata = sc.read_h5ad("./data/zhuang_dataset/abca_processed.h5ad")

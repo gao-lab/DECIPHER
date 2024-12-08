@@ -1,13 +1,13 @@
 # Tutorials
 
-We provide following tutorials for you to get started with `decipher`.
+We provide following tutorials for you to get started with `cell-decipher`.
 
 ## Basic usage
-You can check basic usages of `decipher` in following notebooks:
+You can check basic usages of DECIPHER model in following notebooks:
 
-1. **Train model**: shows how to train `decipher` model on spatial omics data and get high-fidelity disentangled omics and spatial embedding.
+1. **Train model**: shows how to train DECIPHER model on spatial omics data and get high-fidelity disentangled omics and spatial embedding.
 2. **Remove batch effects**: shows how to remove batch effects from spatial omics data.
-3. **Identify localization related LRs**: shows how to identity cell localization related ligand-receptor pairs via `decipher`'s disentangled embeddings.
+3. **Identify localization related LRs**: shows how to identity cell localization related ligand-receptor pairs via DECIPHER disentangled embeddings.
 
 ```{eval-rst}
 .. nbgallery::
@@ -45,7 +45,7 @@ Multi-GPU training is not available in Jupyter/Colab environment. Please run it 
 DDP training will also consumes n times the system memory (n is the number of GPUs)
 ```
 
-`decipher` support DDP (distributed data parallel on multi-GPUs) to accelerate training on big spatial atlas (especially > 1 millons cells). You just need change **1 line** of code to enable DDP:
+`cell-decipher` uses DDP (distributed data parallel on multi-GPUs) to accelerate training on atlas-scale spatial datasets (e.g. > 1 millons cells). You just need change **1 line** of code to enable DDP:
 
 ```python
 from decipher import DECIPHER

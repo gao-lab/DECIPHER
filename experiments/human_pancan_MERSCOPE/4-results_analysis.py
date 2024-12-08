@@ -8,7 +8,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.2
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: conda
 #     language: python
 #     name: python3
 # ---
@@ -16,6 +16,7 @@
 # %% [markdown]
 # # Analysis pan-cancer MERSCOPE dataset results
 # > Run with hpc A100 80G
+#
 # > We use rapids single cell as backend
 #
 
@@ -24,15 +25,19 @@ from pathlib import Path
 # import python reload 
 from importlib import reload
 
+import dask
+dask.config.set({'dataframe.query-planning': False})
+
 import scanpy as sc
 import rapids_singlecell as rsc
+import squidpy as sq
 import numpy as np
-import decipher
-from decipher.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
-from decipher.plot import split_umap
+import spider
+from spider.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
+from spider.plot import split_umap
 
 # reload scanpy_viz function
-reload(decipher.utils)
+reload(spider.utils)
 
 # %%
 adata_path = "./data/pancancer_filter_anno.h5ad"
@@ -45,7 +50,7 @@ adata.obs.head()
 # # RAPIDS analysis
 
 # %%
-embs = Path('./results/decipher_6_10/model/lightning_logs/version_3').glob('*.npy')
+embs = Path('./results/spider_6_10/model/lightning_logs/version_3').glob('*.npy')
 for file in embs:
     if 'umap' in str(file):
         continue
@@ -64,12 +69,12 @@ adata.obs['cell_type'].value_counts()
 adata = scanpy_viz(adata, keys=['nbr_0'], approx = True)
 
 # %%
-np.save('./results/decipher_6_10/model/lightning_logs/version_3/umap_gex_0.npy', adata.obsm['X_umap_gex_0'])
-np.save('./results/decipher_6_10/model/lightning_logs/version_3/umap_nbr_0.npy', adata.obsm['X_umap_nbr_0'])
+np.save('./results/spider_6_10/model/lightning_logs/version_3/umap_gex_0.npy', adata.obsm['X_umap_gex_0'])
+np.save('./results/spider_6_10/model/lightning_logs/version_3/umap_nbr_0.npy', adata.obsm['X_umap_nbr_0'])
 
 # %%
-adata.obsm['X_umap_gex_0'] = np.load('./results/decipher_6_10/model/lightning_logs/version_3/umap_gex_0.npy')
-adata.obsm['X_umap_nbr_0'] = np.load('./results/decipher_6_10/model/lightning_logs/version_3/umap_nbr_0.npy')
+adata.obsm['X_umap_gex_0'] = np.load('./results/spider_6_10/model/lightning_logs/version_3/umap_gex_0.npy')
+adata.obsm['X_umap_nbr_0'] = np.load('./results/spider_6_10/model/lightning_logs/version_3/umap_nbr_0.npy')
 
 # %%
 adata_plot = adata[~adata.obs['cell_type'].isin(['unknown', 'Hepatocyte', 'pneumocyte']), :]
@@ -145,11 +150,83 @@ adata.obs['Tissue_0'].value_counts()
 # %%
 adata.write_h5ad('./results/adata_analysis.h5ad')
 
-# %% [markdown]
-# ## Subtype analysis
+# %%
+adata = sc.read_h5ad('./results/adata_analysis.h5ad')
 
 # %% [markdown]
-# ### T cell analysis
+# # Sub region analysis
+
+# %%
+adata.obs['region'].value_counts()
+
+# %%
+high_inf = adata[adata.obs['region'] == 'Lymphatic infiltrated tumor', :].copy()
+
+# %%
+high_inf = scanpy_viz(high_inf, keys=['nbr_0'], approx = True)
+
+# %%
+high_inf.obsm['X_umap'] = high_inf.obsm['X_umap_nbr_0'].copy()
+sc.pl.umap(high_inf, color=['cell_type'], ncols=1)
+
+# %%
+adata_plot.obs.groupby(['Tissue_0', 'Index']).size().unstack().fillna(0)
+
+
+# %%
+# high_inf.obs.columns
+# high_inf.obs['Tissue_0'].value_counts()
+sub = adata_plot[adata_plot.obs['Index'] == '2', :].copy()
+
+# %%
+sc.set_figure_params(dpi=150, fontsize=15)
+sc.pl.spatial(sub, color=['region'], ncols=1, spot_size=8)
+
+# %%
+sq.gr.spatial_neighbors(sub, n_neighs=30, coord_type='generic')
+sq.gr.nhood_enrichment(sub, cluster_key="cell_type",)
+
+# %%
+from matplotlib.colors import LinearSegmentedColormap
+
+cmap_colors = [
+    (0, 'blue'),  # Color for the low end (-10)
+    (0.35, 'white'),   # 0 will be white
+    (1, 'red')     # Color for the high end (20)
+]
+
+# Create a custom colormap
+cmap = LinearSegmentedColormap.from_list('cmap', [(pos, color) for pos, color in cmap_colors])
+
+sq.pl.nhood_enrichment(sub, cluster_key="cell_type", cmap=cmap)
+
+# %% [markdown]
+# # Subtype analysis
+
+# %% [markdown]
+# ## B cell analysis
+
+# %%
+bcell = adata_plot[adata_plot.obs['cell_type'] == 'B/Plasma cell', :].copy()
+bcell
+
+# %%
+bcell_df = bcell.obs.groupby(['region', 'Tissue_0']).size().unstack().fillna(0)
+# print(bcell_df)
+tmp = bcell_df.iloc[0].values / bcell_df.sum(axis=0).values
+bcell_df.loc['Lymphatic infiltrated tumor'] = tmp
+bcell_df
+
+# %%
+sc.pl.dotplot(bcell, var_names=['HLA-DMA', 'HLA-DPB1', 'HLA-DQA1'], groupby='Tissue_0', layer = None)
+
+
+# %%
+sc.pl.dotplot(bcell, var_names=['HLA-DMA', 'HLA-DPB1', 'HLA-DQA1'], groupby='region')
+
+
+# %% [markdown]
+# ## T cell analysis
 
 # %%
 tcell = adata_plot[adata_plot.obs['cell_type'] == 'T cell', :].copy()
@@ -160,11 +237,40 @@ tcell = gex_embedding(tcell, method='harmony', batch_key='Index', resolution=0.5
 tcell.obs['leiden'].value_counts()
 
 # %%
+tcell.obs.groupby(['region', 'Tissue_0']).size().unstack().fillna(0)
+
+# %%
 tcell_marker = ['CD4', 'CD8A', 'FOXP3', 'PDCD1', 'CCR7', 'GZMK']
 sc.pl.dotplot(tcell, var_names=tcell_marker, groupby='leiden')
 
 # %%
 sc.pl.umap(tcell, color=['leiden', 'PDCD1'], ncols=4, wspace=0.3)
+
+# %%
+sc.pl.dotplot(tcell, var_names=['CXCR4'], groupby='region', layer = 'counts')
+sc.pl.dotplot(tcell, var_names=['CCR7'], groupby='region', layer = 'counts')
+
+
+# %%
+sc.pl.dotplot(tcell, var_names=['CXCR4'], groupby='Tissue_0')
+sc.pl.dotplot(tcell, var_names=['CCR7'], groupby='Tissue_0')
+
+
+# %%
+# sc.pl.umap(tcell, color=['CCL5', 'ZAP70'], ncols=4, wspace=0.3)
+# dp = sc.pl.dotplot(tcell, ['CCL5'], groupby='region', layer = 'counts')
+# dp.style(dot_edge_color='black', dot_edge_lw=0.5).show()
+# sc.pl.dotplot(tcell, var_names=['FOXP3'], groupby='region', layer = 'counts' )
+sc.pl.dotplot(tcell, var_names=['CCL5', 'ZAP70'], groupby='region', layer = 'counts', dot_max=0.65, vmin=1.5, vmax=2.4)
+# sc.pl.dotplot(tcell, var_names=['CCL5'], groupby='region', layer = 'counts', figsize=[2, 2], dot_max=0.60)
+# sc.pl.dotplot(tcell, var_names=['ZAP70'], groupby='region', layer = 'counts')
+
+# %%
+markers = ['PDCD1', 'CTLA4', 'LAG3', 'GZMA', 'GNLY', 'GZMB', 'IFNG', 'CCL5', 'ZAP70']
+# markers = [ 'CCL5', 'ZAP70']
+for idx in tcell.obs.Index.unique():
+    tcell_sub = tcell[tcell.obs['Index'] == idx, :]
+    sc.pl.dotplot(tcell_sub, var_names=markers, groupby='region', layer = 'counts', dot_max=0.65)
 
 # %%
 tcell.obsm['X_umap'] = tcell.obsm['X_umap_nbr_0'].copy()
@@ -185,8 +291,4 @@ rsc.get.anndata_to_CPU(tcell)
 sc.pl.embedding_density(tcell, basis='umap', groupby='leiden', bg_dotsize=1, fg_dotsize=3)
 
 # %%
-adata = sc.read_h5ad('./results/adata_analysis.h5ad')
-adata.obs
-
-# %%
-adata.obs['cell_type'].value_counts()
+adata.var.iloc[:, :2].to_csv('./results/genes.csv')

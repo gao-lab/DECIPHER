@@ -25,7 +25,7 @@ import numpy as np
 import rapids_singlecell as rsc
 import pandas as pd
 
-from decipher.utils import scanpy_viz, clip_umap, manage_gpu
+from spider.utils import scanpy_viz, clip_umap, manage_gpu
 
 # %%
 sc.set_figure_params(dpi=120)
@@ -39,10 +39,10 @@ adata
 # ## Embedding visualization
 
 # %%
-center_emb_3d = np.load('./results/decipher_abca-1_3d_0705/center_emb.npy')
-nbr_emb_3d = np.load('./results/decipher_abca-1_3d_0705/nbr_emb.npy')
-center_emb_2d = np.load('./results/decipher_abca-1_2d_0705/center_emb.npy')
-nbr_emb_2d = np.load('./results/decipher_abca-1_2d_0705/nbr_emb.npy')
+center_emb_3d = np.load('./results/spider_abca-1_3d_0705/center_emb.npy')
+nbr_emb_3d = np.load('./results/spider_abca-1_3d_0705/nbr_emb.npy')
+center_emb_2d = np.load('./results/spider_abca-1_2d_0705/center_emb.npy')
+nbr_emb_2d = np.load('./results/spider_abca-1_2d_0705/nbr_emb.npy')
 
 # %%
 adata.obsm['X_center_3d'] = center_emb_3d

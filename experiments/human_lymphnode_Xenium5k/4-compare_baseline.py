@@ -8,7 +8,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.2
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: conda
 #     language: python
 #     name: python3
 # ---
@@ -27,9 +27,9 @@ import torch
 import numpy as np
 from torch_geometric.nn import SimpleConv
 
-from decipher.explain.lr import get_lr_expr
-from decipher.graphic.build import build_graph
-from decipher.utils import scanpy_viz, gex_embedding
+from spider.explain.gene.lr import get_lr_expr
+from spider.graphic.build import build_graph
+from spider.utils import scanpy_viz, gex_embedding
 
 
 # %%
@@ -185,7 +185,6 @@ sc.set_figure_params(dpi=150)
 # ## Find differential expressed LR across spatial domains
 
 # %%
-lr = pd.read_csv('./results/lr_baseline/lr_filter.csv')
 lr = pd.read_csv('./results/lr_baseline/lr_filter.csv')
 
 # %%

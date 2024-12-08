@@ -14,11 +14,11 @@
 # ---
 
 # %%
-from decipher import DECIPHER
+from spider import Spider
 import scanpy as sc
 
 # %%
-model = DECIPHER(work_dir='./results/decipher')
+model = Spider(work_dir='./results/spider')
 
 # %%
 model.visualize()
@@ -28,7 +28,7 @@ model.visualize()
 # ### T cells
 
 # %%
-embedding = sc.read_h5ad('./results/decipher/embedding.h5ad')
+embedding = sc.read_h5ad('./results/spider/embedding.h5ad')
 
 # %%
 adata.obsm.update(embedding.obsm)

@@ -97,6 +97,9 @@ dev = ["pytest", "pytest-sugar", "pytest-cov", "pytest-xdist",
 include = ["decipher"]
 exclude = ["**/conda", "**/__pycache__", "**/.**"]
 ignore = ["resource/"]
+typeCheckingMode = "off"
+reportCallIssue = 'warning'
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

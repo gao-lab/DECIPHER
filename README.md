@@ -86,7 +86,7 @@ sc.pl.umap(adata, color=['region'])
 ## Citation
 In coming.
 
-> If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/README.md) and [**experiments**](./experiments/README.md) folder.
+> If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/) and [**experiments**](./experiments/) folder.
 
 ## FAQ
 > Please open a new [github issue](https://github.com/gao-lab/DECIPHER/issues/new/choose) if you meet problem.

@@ -24,7 +24,7 @@ import torch
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from decipher.utils import scanpy_viz, gex_embedding
+from spider.utils import scanpy_viz, gex_embedding
 
 
 # %%
@@ -39,8 +39,8 @@ print(adata)
 print((adata.X >0).sum(1).mean())
 
 
-center_emb = np.load('./results/decipher_explain/center_emb.npy')
-nbr_emb = np.load('./results/decipher_explain/nbr_emb.npy')
+center_emb = np.load('./results/spider_explain/center_emb.npy')
+nbr_emb = np.load('./results/spider_explain/nbr_emb.npy')
 
 adata.obsm['X_center'] = center_emb
 adata.obsm['X_nbr'] = nbr_emb
@@ -54,7 +54,7 @@ adata.obsm['X_nbr'] = nbr_emb
 # ## Select genes
 
 # %%
-gene_mask = np.load('./results/decipher_explain/explain/select_celltype:Bcell/gene_mask.npy')
+gene_mask = np.load('./results/spider_explain/explain/select_celltype:Bcell/gene_mask.npy')
 print(gene_mask.shape)
 
 gene_df_bcell = adata.var
@@ -67,7 +67,7 @@ gene_df_bcell['score'] = gene_df_bcell['counts'] / gene_mask.shape[0]
 gene_df_bcell[['counts', 'score']].head(10)
 
 # %%
-gene_mask = np.load('./results/decipher_explain/explain/select_celltype:Tcell/gene_mask.npy')
+gene_mask = np.load('./results/spider_explain/explain/select_celltype:Tcell/gene_mask.npy')
 
 gene_df_tcell = adata.var
 gene_df_tcell['counts'] = gene_mask.sum(0)

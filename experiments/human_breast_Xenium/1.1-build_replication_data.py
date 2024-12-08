@@ -21,7 +21,7 @@
 # %%
 import scanpy as sc
 import pandas as pd
-from decipher.utils import gex_embedding, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER, scanpy_viz
+from spider.utils import gex_embedding, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER, scanpy_viz
 
 
 # %% [markdown]

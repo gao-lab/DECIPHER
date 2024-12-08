@@ -1,6 +1,6 @@
 import scanpy as sc
 import pandas as pd
-from decipher import DECIPHER, CFG
+from spider import Spider, CFG
 from addict import Dict
 
 CFG.omics.model.epochs = 6
@@ -12,12 +12,12 @@ adata = sc.read_h5ad("./data/lymph_node.h5ad")
 adata.X = adata.layers["counts"].copy()
 
 # fit model
-# model = DECIPHER(work_dir="./results/decipher", user_cfg=CFG)
+# model = Spider(work_dir="./results/spider", user_cfg=CFG)
 # model.register_data(adata, cell_type="cell_type")
 # model.fit_omics()
 
 # explain model
-model = DECIPHER(work_dir="./results/decipher", user_cfg=CFG, recover=True)
+model = Spider(work_dir="./results/spider", user_cfg=CFG, recover=True)
 adata.X = adata.layers['counts'].copy()
 # remove 'cell_type' == 'low_quality' cells
 # adata = adata[~adata.obs['cell_type'].isin(['low_quality', 'unknown']), :]

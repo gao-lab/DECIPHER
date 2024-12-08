@@ -1,11 +1,11 @@
 import scanpy as sc
 import numpy as np
-from decipher import DECIPHER
+from spider import Spider
 
 
-model = DECIPHER(work_dir="./results/decipher_6_10", recover=True)
-model.nbr_emb = np.load('./results/decipher_6_10/model/lightning_logs/version_3/epoch-0_nbr_emb.npy')
-model.center_emb = np.load('./results/decipher_6_10/model/lightning_logs/version_3/epoch-0_gex_emb.npy')
+model = Spider(work_dir="./results/spider_6_10", recover=True)
+model.nbr_emb = np.load('./results/spider_6_10/model/lightning_logs/version_3/epoch-0_nbr_emb.npy')
+model.center_emb = np.load('./results/spider_6_10/model/lightning_logs/version_3/epoch-0_gex_emb.npy')
 
 adata = sc.read_h5ad("./data/pancancer_filter_anno.h5ad")
 adata.X = adata.layers['counts']
