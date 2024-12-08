@@ -31,10 +31,12 @@ class SelectEncoder(nn.Module):
         self.config = config
         self.emb2mask = MLP([config.center_dim, config.expr_dim], bias=False)
 
-    def forward(self, emb: Tensor, expr: Tensor, return_mask: bool = False) -> tuple:
+    def forward(
+        self, emb: Tensor, expr: Tensor, return_mask: bool = False, hard: bool = True
+    ) -> tuple:
         gene_mask = self.emb2mask(emb)
         gene_mask = gumbel_sigmoid(
-            gene_mask, tau=1, hard=True, threshold=self.config.gumbel_threshold
+            gene_mask, tau=1, hard=hard, threshold=self.config.gumbel_threshold
         )
         if return_mask:
             return gene_mask
@@ -74,14 +76,16 @@ class GAE_lightning(LightningModule):
 
 
 @ray.remote(num_gpus=1, num_cpus=8)
-def ray_train_GAE(**kwargs) -> None:
-    kwargs["config"]["select_gpu"] = False
-    return train_GAE(**kwargs)
+def ray_train_GAE(
+    graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False, mini_batch: bool = False
+):
+    config["select_gpu"] = False
+    return train_GAE(graph, config, save_dir, disable_gpu, mini_batch)
 
 
 def train_GAE(
-    graph: Data, config: Dict, save_dir: Path, mini_batch: bool = False, use_gpu: bool = True
-) -> None:
+    graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False, mini_batch: bool = False
+):
     r"""
     Train graph autoencoder
 
@@ -93,18 +97,18 @@ def train_GAE(
         config for train GAE
     save_dir
         save directory
+    disable_gpu
+        if disable gpu
     mini_batch
-        if use mini-batch (not recommended)
-    use_gpu
-        use GPU if available
+        if use mini-batch
     """
     if mini_batch:
-        logger.warning("Train GAE with mini-batch is a experimental feature.")
+        logger.warning("Train GAE with mini-batch is a experimental feature without test.")
         config.fit.model_dir = str(save_dir)
         config.fit.work_dir = config.work_dir
         return train_GAE_mini_batch(graph, config, save_dir)
     else:
-        return train_GAE_whole(graph, config, save_dir, use_gpu)
+        return train_GAE_whole(graph, config, save_dir, disable_gpu)
 
 
 def train_GAE_mini_batch(graph: Data, config: Dict, save_dir: Path) -> None:
@@ -120,7 +124,6 @@ def train_GAE_mini_batch(graph: Data, config: Dict, save_dir: Path) -> None:
     save_dir
         save directory
     """
-    logger.warning("Train GAE with mini-batch is a experimental feature without testing.")
     config.gae_fit.model_dir = str(save_dir)
     # model
     pl_model = GAE_lightning(GAE(SelectEncoder(config)), config.lr_base, config.l1_weight)
@@ -154,7 +157,7 @@ def train_GAE_mini_batch(graph: Data, config: Dict, save_dir: Path) -> None:
 
 
 def train_GAE_whole(
-    graph: Data | Batch, config: Dict, save_dir: Path, use_gpu: bool = True, fp16: bool = True
+    graph: Data | Batch, config: Dict, save_dir: Path, disable_gpu: bool = False, fp16: bool = True
 ) -> None:
     r"""
     Train graph autoencoder with whole graph
@@ -167,10 +170,10 @@ def train_GAE_whole(
         config for train GAE
     save_dir
         save directory
-    use_gpu
-        use GPU if available
+    disable_gpu
+        if disable gpu
     fp16
-        use fp16 (if GPU is available)
+        if use fp16
     """
     # Step1. set up model and optimizer
     encoder = SelectEncoder(config)
@@ -178,7 +181,7 @@ def train_GAE_whole(
 
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr_base)
 
-    if torch.cuda.is_available() and use_gpu:
+    if torch.cuda.is_available() and not disable_gpu:
         if config.select_gpu:
             cuda_idx = select_free_gpu()[0]
             device = f"cuda:{cuda_idx}"
@@ -187,7 +190,6 @@ def train_GAE_whole(
         model = model.to(device)
     else:
         device = "cpu"
-        fp16 = False
 
     # Step2. split edge into train and test (not node)
     transform = T.Compose(
@@ -202,7 +204,7 @@ def train_GAE_whole(
             ),
         ]
     )
-    if fp16:
+    if fp16 and device != "cpu":
         logger.debug("Train GAE with fp16")
         model = model.bfloat16()
         graph.x, graph.expr = graph.x.bfloat16(), graph.expr.bfloat16()

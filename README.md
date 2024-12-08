@@ -91,13 +91,14 @@ In coming.
 ## FAQ
 > Please open a new [github issue](https://github.com/gao-lab/DECIPHER/issues/new/choose) if you meet problem.
 
-1. `CUDA out of memory` error
-
-The `model.train_gene_select()` function in [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) tutorial (~700k cells and 1k LRs) uses ~40G GPU memory. If your GPU device do not have enough memory, you still can train model on GPU but set `use_gpu=False` in `model.train_gene_select()`.
-
-2. Visium or ST data
+1. Visium or ST data
 
 DECIPHER is designed for single cell resolution data. As for Visium or ST, you can still use DECIPHER after obtaining single-cell resolution through deconvolution or spatial mapping strategies.
+
+<!-- 2. `CUDA out of memory` error
+
+The `model.train_gene_select()` may need a lot GPU memory. For example, it needs ~40G GPU memory in [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) tutorial (with ~700k cells and 1k LRs). If your GPU device do not have enough memory, you still can train model on GPU but set `disable_gpu=True` in `model.train_gene_select()`. -->
+
 
 ## Acknowledgement
 We thank the following great open-source projects for their help or inspiration:

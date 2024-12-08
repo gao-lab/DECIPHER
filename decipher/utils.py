@@ -158,7 +158,7 @@ GENESELECT_CFG = Dict(
     gumbel_threshold=0.5,
     num_neighbors=[-1],
     fit=deepcopy(fit_cfg),
-    loader=loader_cfg,
+    loader=deepcopy(loader_cfg),
     select_gpu=False,
 )
 GENESELECT_CFG.fit.update(epochs=300)

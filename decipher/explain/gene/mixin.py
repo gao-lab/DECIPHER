@@ -33,6 +33,7 @@ class GeneSelectMixin:
         sub_dir: str = "explain",
         subsets: list | str = None,
         batch: str = None,
+        per_batch: bool = False,
         lr_mode: bool = False,
         lr_data: pd.DataFrame = None,
         lr_radius: float = 0.5,
@@ -40,7 +41,7 @@ class GeneSelectMixin:
         normalize: bool = True,
         min_cells: int = 1000,
         user_cfg: Dict = {},
-        use_gpu: bool = True,
+        disable_gpu: bool = False,
         n_jobs: int = -1,
     ):
         r"""
@@ -72,8 +73,8 @@ class GeneSelectMixin:
             Minimum cells for each cell type
         user_cfg
             User config for explain model
-        use_gpu
-            If use GPU
+        disable_gpu
+            If disable GPU (only when GPU memory is not enough)
         n_jobs
             Number of jobs to run in parallel
         """
@@ -130,7 +131,8 @@ class GeneSelectMixin:
                 continue
             name = f"select_celltype_{_cell_type}"
             name = name.replace(" ", "_").replace("/", "_")
-            save_dir_list.append(name)
+            if not per_batch:
+                save_dir_list.append(name)
 
             if len(batches) == 1:
                 edge_index = build_graph(
@@ -141,6 +143,10 @@ class GeneSelectMixin:
                     expr=expr[subset_cell_type],
                     edge_index=edge_index,
                 )
+                graph_list.append(graph)
+                if per_batch:
+                    save_dir = f"{name}_batch_{batches[0]}"
+                    save_dir_list.append(save_dir)
             else:
                 batch_graph_list = []
                 for _batch in batches:
@@ -162,19 +168,28 @@ class GeneSelectMixin:
                         edge_index=edge_index,
                     )
                     batch_graph_list.append(batch_graph)
-                graph = Batch.from_data_list(batch_graph_list)
-            graph_list.append(graph)
+                    if per_batch:
+                        save_dir = f"{name}_batch_{_batch}"
+                        save_dir_list.append(save_dir)
+                if not per_batch:
+                    graph = Batch.from_data_list(batch_graph_list)
+                    graph_list.append(graph)
+                else:
+                    graph_list.extend(batch_graph_list)
 
         # train models
+        assert len(graph_list) == len(
+            save_dir_list
+        ), f"Graphs {len(graph_list)} != save_dirs {len(save_dir_list)}"
+        ray.init()
         if n_jobs == 1:
             for graph, save_dir in zip(graph_list, save_dir_list):
-                train_GAE(graph, cfg, save_dir, use_gpu)
+                train_GAE(graph, cfg, save_dir, disable_gpu)
         else:
-            ray.init()
             q = [
-                ray_train_GAE.remote(graph, cfg, save_dir, use_gpu)
+                ray_train_GAE.remote(graph, cfg, save_dir, disable_gpu)
                 for graph, save_dir in zip(graph_list, save_dir_list)
             ]
             ray.get(q)
-            ray.shutdown()
+        ray.shutdown()
         logger.info(f"Gene selection finished in {time.time() - start_time:.2f}s")

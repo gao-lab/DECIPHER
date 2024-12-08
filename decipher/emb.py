@@ -144,13 +144,15 @@ def sc_emb(
     -----------
     model
         Pre-trained omics encoder
+    center_emb
+        omics embedding
     """
     config = deepcopy(config)
     config.model.update(config.pretrain)
     mnn_flag = True if mnn_dataset is not None else False
     if not config.pretrain.force:
         try:
-            return load_sc_model(config, mnn_flag, meta), None
+            return load_sc_model(config, mnn_flag, meta)
         except Exception as e:  # noqa
             logger.info(f"Not found pre-trained model: {e}")
 
