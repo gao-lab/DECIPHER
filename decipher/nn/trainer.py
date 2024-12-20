@@ -4,6 +4,7 @@ Trainer of contrastive learning
 import time
 from pathlib import Path
 
+import torch
 from addict import Dict
 from loguru import logger
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
@@ -26,14 +27,16 @@ def init_trainer(config: Dict, callback: list[Callback] = None, plugins=None) ->
     """
     # save dir
     model_dir = Path(config.work_dir) / config.model_dir
-    # may raise error if specify DDP gpu ids
-    if config.device_num == 1 and config.device in ["auto", "gpu"]:
-        if config.select_gpu:
-            devices = select_free_gpu(config.device_num)
-        else:
-            devices = 1
+    # device
+    devices = "auto"
+    if not torch.cuda.is_available():
+        config.device = "cpu"
     else:
-        devices = config.device_num
+        if config.device_num == 1:
+            if config.device in ["auto", "gpu"] and config.select_gpu:
+                devices = select_free_gpu(config.device_num)
+        else:  # for DDP, it will raise error if specify DDP gpu ids
+            devices = config.device_num
     # callbacks
     progress_bar = TQDMProgressBar(refresh_rate=1)
     early_stop = EarlyStopping(monitor="train/total_loss", patience=config.patient, verbose=True)
@@ -50,10 +53,10 @@ def init_trainer(config: Dict, callback: list[Callback] = None, plugins=None) ->
         callback_list.extend(callback)
 
     # precision
-    if config.fp16:
-        precision = "16-mixed" if config.device != "cpu" else "bf16-mixed"
+    if config.fp16 and torch.cuda.is_available():
+        precision = "16"
     else:
-        precision = "32"
+        precision = None  # auto select
     logger.debug(f"Run model with precision {precision}")
     # strategy
     strategy = "ddp" if config.device == "gpu" and config.device_num > 1 else "auto"

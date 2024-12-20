@@ -152,7 +152,7 @@ def sc_emb(
     mnn_flag = True if mnn_dataset is not None else False
     if not config.pretrain.force:
         try:
-            return load_sc_model(config, mnn_flag, meta)
+            return load_sc_model(config, mnn_flag, meta), None
         except Exception as e:  # noqa
             logger.info(f"Not found pre-trained model: {e}")
 
