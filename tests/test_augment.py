@@ -19,12 +19,13 @@ n_id = torch.range(0, 5, dtype=torch.long)
 g_omics = Data(x=torch.rand(6, 10), batch=batch, edge_index=edge_index, batch_size=2, n_id=n_id)
 
 
-@mark.parametrize("config,edge_index,x", [(config, edge_index, g_omics)])
-def test_OmicsSpatialAugment(config, edge_index, g):
-    aug = OmicsSpatialAugment(config, edge_index)
+@mark.parametrize("config,x", [(config, g_omics)])
+def test_OmicsSpatialAugment(config, g):
+    aug = OmicsSpatialAugment(config)
     x1, x2, batch_mask = aug(g)
+    print(x1, x2, batch_mask)
 
 
 if __name__ == "__main__":
-    test_OmicsSpatialAugment(config, edge_index, g_omics)
+    test_OmicsSpatialAugment(config, g_omics)
     logger.success("test passed")

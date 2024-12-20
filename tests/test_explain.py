@@ -30,9 +30,9 @@ def test_GAE_mimic():
         expr=torch.randn(N_CELL2, 300),
     )
     graph = Batch.from_data_list([graph1, graph2])
-    train_GAE(graph, GENESELECT_CFG, save_dir="test_GAE_batch")
+    train_GAE(graph, GENESELECT_CFG, save_dir="test_GAE_batched")
     train_GAE(graph1, GENESELECT_CFG, save_dir="test_GAE")
-    train_GAE(graph1, GENESELECT_CFG, batched=True, save_dir="test_GAE_mini_batch")
+    train_GAE(graph1, GENESELECT_CFG, mini_batch=True, save_dir="test_GAE_mini_batch")
 
 
 def test_regress_mimic():

@@ -7,13 +7,13 @@ from decipher.utils import CFG, sync_config
 def test_sc_plain(adata):
     CFG.work_dir = "./results/sc_pbmc_mimic_plain"
     sync_config(CFG)
-    sc_emb(adata, CFG.omics, preprocess=False)
+    sc_emb(adata, CFG.omics)
 
 
 def test_sc_mnn(adata):
     CFG.work_dir = "./results/sc_pbmc_mimic_mnn"
     sync_config(CFG)
-    sc_emb(adata, CFG.omics, "batch", preprocess=False)
+    sc_emb(adata, CFG.omics, "batch")
 
 
 if __name__ == "__main__":

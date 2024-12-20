@@ -5,7 +5,7 @@ from decipher.graphic.build import build_graph
 from decipher.utils import CFG, sync_config
 
 
-def test_omics_contrastive(adata):
+def test_omics_contrastive(adata: sc.AnnData):
     CFG.work_dir = "./results/omics_pbmc_mimic"
     CFG.omics.fit.device_num = 1
     CFG.omics.model.epochs = 2

@@ -34,13 +34,11 @@ def test_decipher_omics_single(h5ad_path: str = None):
 
 
 @GetRunTime
-def test_decipher_omics_multi():
+def test_decipher_omics_multi(adata, adata_2):
     CFG.omics.model.epochs = 3
     work_dir = "./results/decipher_omics_multi"
-    # adata1 = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
-    # adata2 = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_2")
     model = DECIPHER(work_dir=work_dir, recover=True)
-    # model.register_data([adata1, adata2], group_list=["Section1", "Section2"])
+    model.register_data([adata, adata_2], group_list=["Section1", "Section2"])
     model.fit_omics()
     model.visualize()
 

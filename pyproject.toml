@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "cell-decipher"
 packages = [{include = "decipher"}]
-version = "0.1.0"
+version = "0.1.1"
 description = "Spatial-omics data embedding and analysis"
 readme = "README.md"
 license = "MIT"

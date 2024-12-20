@@ -12,7 +12,6 @@ install_pyg_dependencies
 ```
 
 ## Unit test
-> Not finish yet
 ```sh
 pytest --cov -n 8
 ```
@@ -36,5 +35,5 @@ py-spy record -o profile.svg -- python -m <YOUR_SCRIPT.py>
 ## Build docker image
 ```sh
 # cd DECIPHER/
-docker image build --no-cache . -t huhansan666666/decipher:v0.1.0 --network=host
+docker image build --no-cache . -t huhansan666666/decipher:latest --network=host
 ```

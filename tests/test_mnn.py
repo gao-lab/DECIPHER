@@ -4,8 +4,8 @@ from decipher.data.mnn_dataset import MNNDataset
 from decipher.utils import CFG
 
 
-def test_MNNDataset(*args, **kwargs):
-    MNNDataset(*args, **kwargs)
+def test_MNNDataset(x, cell_idx, cfg):
+    MNNDataset(x, cell_idx, cfg)
 
 
 if __name__ == "__main__":
