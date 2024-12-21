@@ -1,9 +1,12 @@
 [![stars-badge](https://img.shields.io/github/stars/gao-lab/DECIPHER?logo=GitHub&color=yellow)](https://github.com/gao-lab/DECIPHER/stargazers)
+[![Downloads](https://static.pepy.tech/badge/cell-decipher)](https://pepy.tech/project/cell-decipher)
 [![build-badge](https://github.com/gao-lab/DECIPHER/actions/workflows/build.yml/badge.svg)](https://github.com/gao-lab/DECIPHER/actions/workflows/build.yml)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![docs-badge](https://readthedocs.org/projects/cell-decipher/badge/?version=latest)](https://cell-decipher.readthedocs.io/en/latest/)
 [![license-badge](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Python 3.10|3.11|3.12](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)
+![PyPI](https://img.shields.io/pypi/v/cell-decipher?label=pypi)
+![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
 
+<!-- [![codecov](https://codecov.io/gh/gao-lab/DECIPHER/graph/badge.svg?token=zgwG4u9v0F)](https://codecov.io/gh/gao-lab/DECIPHER) -->
 
 # DECIPHER
 <div align="center">

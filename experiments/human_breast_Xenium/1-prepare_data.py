@@ -20,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import rapids_singlecell as rsc
 
-from spider.utils import gex_embedding, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER, scanpy_viz
+from decipher.utils import gex_embedding, IMMUNE_MARKER, CANCER_MARKER, OTHER_MARKER, scanpy_viz
 
 # %% [markdown]
 # ## Build data

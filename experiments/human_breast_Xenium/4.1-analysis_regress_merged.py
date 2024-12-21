@@ -26,8 +26,8 @@ from scipy import stats
 # ## Different runs
 
 # %%
-df1 = pd.read_csv('./results/spider_rep1/explain/explain_results_1.csv')
-df2 = pd.read_csv('./results/spider_rep1/explain/explain_results_2.csv')
+df1 = pd.read_csv('./results/decipher_rep1/explain/explain_results_1.csv')
+df2 = pd.read_csv('./results/decipher_rep1/explain/explain_results_2.csv')
 df1['run'] = 'run1'
 df2['run'] = 'run2'
 df = pd.concat([df1, df2])
@@ -61,7 +61,7 @@ plt.text(.05, .95, f'R={r:.2f}, p={p:.1e}', transform=ax.transAxes)
 # ## Different technology replicates
 
 # %%
-df = pd.read_csv('./results/spider_merged_6_28/explain/explain_results.csv', index_col=0)
+df = pd.read_csv('./results/decipher_merged_6_28/explain/explain_results.csv', index_col=0)
 df['experiment'] = df.index
 df['cell_type'] = df.index.str.split('celltype:').str[-1]
 df['batch'] = df.index.str.split('_cell').str[0].str.split(':').str[1]
@@ -98,7 +98,7 @@ plt.text(.05, .95, f'R={r:.2f}, p={p:.1e}', transform=ax.transAxes)
 # ## Forward and reverse
 
 # %%
-df = pd.read_csv('./results/spider_rep1/explain_reverse/explain_results.csv')
+df = pd.read_csv('./results/decipher_rep1/explain_reverse/explain_results.csv')
 df['cell_type'] = df['Unnamed: 0'].str.split('celltype:').str[-1]
 # create 'direct' col, if 'reverse' in Unnamed: 0, then 'direct' is 'reverse', else 'direct' is 'forward'
 df['direct'] = df['Unnamed: 0'].apply(lambda x: 'reverse' if 'reverse' in x else 'forward')

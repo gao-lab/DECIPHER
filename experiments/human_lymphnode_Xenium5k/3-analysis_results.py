@@ -24,13 +24,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import rapids_singlecell as rsc
 
-from spider.utils import scanpy_viz, manage_gpu, clip_umap
+from decipher.utils import scanpy_viz, manage_gpu, clip_umap
 
 # %%
 adata = sc.read_h5ad('./data/lymph_node.h5ad')
 
-center_emb = np.load('./results/spider/center_emb.npy')
-nbr_emb = np.load('./results/spider/nbr_emb.npy')
+center_emb = np.load('./results/decipher/center_emb.npy')
+nbr_emb = np.load('./results/decipher/nbr_emb.npy')
 
 adata.obsm['X_center'] = center_emb
 adata.obsm['X_nbr'] = nbr_emb
@@ -66,10 +66,10 @@ sc.pl.umap(adata, color = ['CXCR4', 'CXCR5', 'CXCL12', 'CXCL13', 'CR2', 'FCER2']
 # ## analysis gene selection
 
 # %%
-gene_mask = np.load('./results/spider/explain/select_batch:None_celltype:Bcell/gene_mask.npy')
+gene_mask = np.load('./results/decipher/explain/select_batch:None_celltype:Bcell/gene_mask.npy')
 print(gene_mask.shape)
 
-lr_df = pd.read_csv('./results/spider/explain/lr.csv')
+lr_df = pd.read_csv('./results/decipher/explain/lr.csv')
 
 lr_df['counts'] = gene_mask.sum(0)
 # sort by counts
@@ -90,10 +90,10 @@ _ = plt.xticks(fontsize=9)
 _ = plt.xlabel('Score', fontsize=10)
 
 # %%
-gene_mask = np.load('./results/spider/explain/select_batch:None_celltype:Plasma/gene_mask.npy')
+gene_mask = np.load('./results/decipher/explain/select_batch:None_celltype:Plasma/gene_mask.npy')
 print(gene_mask.shape)
 
-lr_df = pd.read_csv('./results/spider/explain/lr.csv')
+lr_df = pd.read_csv('./results/decipher/explain/lr.csv')
 
 lr_df['counts'] = gene_mask.sum(0)
 # sort by counts

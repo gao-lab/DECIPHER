@@ -13,7 +13,7 @@ install_pyg_dependencies
 
 ## Unit test
 ```sh
-pytest --cov -n 8
+pytest --cov --cov-report=xml -n 8 --continue-on-collection-errors
 ```
 
 ## Build docs

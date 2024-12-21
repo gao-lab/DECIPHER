@@ -3,8 +3,6 @@ Plot functions
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
 import scanpy as sc
 from anndata import AnnData
 from loguru import logger
@@ -68,88 +66,3 @@ def split_umap(adata, split_by, ncol=1, nrow=None, **kwargs):
         ax = axs[i]
         sc.pl.umap(adata[adata.obs[split_by] == cat], ax=ax, show=False, title=cat, **kwargs)
     plt.tight_layout()
-
-
-def Sankey(
-    matching_table: pd.DataFrame,
-    filter_num: int = 50,
-    color: list[str] = "red",
-    title: str = "",
-    layout: list[int] = [1300, 900],
-    font_size: float = 15,
-    font_color: str = "Black",
-    save_name: str = None,
-    format: str = "png",
-    width: int = 1200,
-    height: int = 1000,
-    return_fig: bool = False,
-) -> None:
-    r"""
-    Sankey plot of celltype
-
-    Parameters
-    ----------
-    matching_table
-        matching table
-    filter_num
-        filter number of matches
-    color
-        color of node
-    title
-        plot title
-    layout
-        layout size of picture
-    font_size
-        font size in plot
-    font_color
-        font color in plot
-    save_name
-        save file name (None for not save)
-    format
-        save picture format (see https://plotly.com/python/static-image-export/ for more details)
-    width
-        save picture width
-    height
-        save picture height
-    return_fig
-        if return plotly figure
-    """
-    source, target, value = [], [], []
-    label_ref = matching_table.columns.to_list()
-    label_query = matching_table.index.to_list()
-    label_all = label_query + label_ref
-    label2index = dict(zip(label_all, list(range(len(label_all)))))
-
-    for i, query in enumerate(label_query):
-        for j, ref in enumerate(label_ref):
-            if int(matching_table.iloc[i, j]) > filter_num:
-                target.append(label2index[query])
-                source.append(label2index[ref])
-                value.append(int(matching_table.iloc[i, j]))
-
-    fig = go.Figure(
-        data=[
-            go.Sankey(
-                node=dict(
-                    pad=50,
-                    thickness=50,
-                    line=dict(color="green", width=0.5),
-                    label=label_all,
-                    color=color,
-                ),
-                link=dict(
-                    source=source,  # indices correspond to labels, eg A1, A2, A1, B1, ...
-                    target=target,
-                    value=value,
-                ),
-            )
-        ],
-        layout=go.Layout(autosize=False, width=layout[0], height=layout[1]),
-    )
-
-    fig.update_layout(title_text=title, font_size=font_size, font_color=font_color)
-    fig.show()
-    if save_name is not None:
-        fig.write_image(save_name + f".{format}", width=width, height=height)
-    if return_fig:
-        return fig

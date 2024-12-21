@@ -33,7 +33,7 @@ cell_num['cell_type'] = cell_num.index.str.replace(' ', '_')
 cell_num
 
 # %%
-df_3d = pd.read_csv('./results/spider_abca-1_3d_0705/explain/explain_results.csv')
+df_3d = pd.read_csv('./results/decipher_abca-1_3d_0705/explain/explain_results.csv')
 # sort by 'test/r2_score'
 df_3d = df_3d.sort_values(by='test_r2_score', ascending=False)
 colname = df_3d.columns.tolist()

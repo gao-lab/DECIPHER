@@ -15,7 +15,7 @@
 
 # %%
 import scanpy as sc
-from spider import Spider, CFG
+from decipher import DECIPHER, CFG
 
 # %%
 CFG.omics.model.augment.dropout_gex = 0.4
@@ -27,7 +27,7 @@ CFG.omics.model.max_steps = 20_000
 CFG.omics.spatial_graph.k = 15
 
 # %%
-model = Spider(work_dir="./results/spider_6_10", user_cfg=CFG)
+model = DECIPHER(work_dir="./results/decipher_6_10", user_cfg=CFG)
 
 # %%
 adata_path = "./data/pancancer_filter_anno.h5ad"

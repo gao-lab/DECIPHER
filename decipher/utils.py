@@ -157,12 +157,8 @@ GENESELECT_CFG = Dict(
     test_ratio=0.3,
     gumbel_threshold=0.5,
     num_neighbors=[-1],
-    fit=deepcopy(fit_cfg),
-    loader=deepcopy(loader_cfg),
     select_gpu=False,
 )
-GENESELECT_CFG.fit.update(epochs=300)
-GENESELECT_CFG.loader.update(batch_size=32)
 
 
 def sync_config(cfg: Dict) -> None:
@@ -208,18 +204,6 @@ def GetRunTime(func):
         return ret
 
     return call_func
-
-
-def in_ipynb() -> bool:  # pragma: no cover
-    r"""
-    If the code running in a Jupyter notebook
-    """
-    try:
-        if type(get_ipython()).__name__ == "ZMQInteractiveShell":  # type: ignore
-            return True
-    except NameError:
-        pass
-    return False
 
 
 def install_pyg_dep(torch_version: str | None = None, cuda_version: str | None = None) -> None:
@@ -292,6 +276,7 @@ def select_free_gpu(n: int = 1) -> list[int] | None:
     n_devices
         list of devices index
     """
+    assert n > 0
     try:
         pynvml.nvmlInit()
         devices = os.environ.get("CUDA_VISIBLE_DEVICES", None)
@@ -483,7 +468,6 @@ def gex_embedding(
     viz: bool = True,
     forbid_rapids: bool = False,
     rapids_after_scale: bool = True,
-    plot: bool = False,
     resolution: float = 0.8,
     harmony_version: str = "torch",
     emb_only: bool = False,
@@ -525,8 +509,6 @@ def gex_embedding(
         If forbid rapids, default is False
     rapids_after_scale
         If use rapids after scale, default is False, should set to True on large dataset
-    plot
-        If plot the UMAP, default is False
     resolution
         Resolution for leiden clustering, default is 0.8
     harmony_version
@@ -616,8 +598,6 @@ def gex_embedding(
         sc_.pp.neighbors(adata, use_rep="X_gex")
         sc_.tl.leiden(adata, resolution=resolution)
         sc_.tl.umap(adata)
-        if plot:
-            sc.pl.umap(adata, color="leiden", save="_gex.png")
 
     if sc_ is not sc:
         sc_.get.anndata_to_CPU(adata)
@@ -630,7 +610,7 @@ def nbr_embedding(
     edge_index: Tensor,
     X_gex: str,
     viz: bool = True,
-    plot: bool = False,
+    n_neighbors: int = 15,
     resolution: float = 0.3,
 ) -> AnnData:
     r"""
@@ -643,14 +623,7 @@ def nbr_embedding(
     adata.obsm["X_nbr"] = embd.cpu().detach().numpy()
 
     if viz:
-        sc.pp.neighbors(adata, use_rep="X_nbr")
-        sc.tl.leiden(adata, resolution=resolution)
-        sc.tl.umap(adata)
-        adata.obsm["X_umap_nbr"] = adata.obsm["X_umap"]
-        adata.obs["leiden_nbr"] = adata.obs["leiden"]
-        if plot:
-            sc.pl.umap(adata, color="leiden", save="_nbr.png")
-            sc.pl.spatial(adata, color="leiden", save="_nbr.png", spot_size=adata.uns["spot_size"])
+        adata = scanpy_viz(adata, keys=["nbr"], resolution=resolution, n_neighbors=n_neighbors)
     return adata.copy()
 
 

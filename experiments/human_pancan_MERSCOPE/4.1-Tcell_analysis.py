@@ -28,12 +28,12 @@ from importlib import reload
 import scanpy as sc
 import rapids_singlecell as rsc
 import numpy as np
-import spider
-from spider.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
-from spider.plot import split_umap
+import decipher
+from decipher.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
+from decipher.plot import split_umap
 
 # reload scanpy_viz function
-reload(spider.utils)
+reload(decipher.utils)
 
 # %%
 adata_path = "./data/pancancer_filter_anno.h5ad"

@@ -34,7 +34,7 @@ gene_df = pd.read_csv('./results/genes.csv', index_col=0)
 gene_df.head()
 
 # %%
-gene_mask = np.load('./results/spider_6_10/explain/celltype_T_cell/gene_mask.npy')
+gene_mask = np.load('./results/decipher_6_10/explain/celltype_T_cell/gene_mask.npy')
 print(gene_mask.shape)
 
 gene_df['counts'] = gene_mask.sum(0)

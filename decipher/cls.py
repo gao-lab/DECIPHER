@@ -83,20 +83,20 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
 
         Parameters
         ----------
-        adatas: list[AnnData] | AnnData
-            AnnData or list of slice, each is a spatial slice
+        adata:
+            spatial slice or a list of spatial slice (in the form of `AnnData`)
         group_list
-            Group list for each AnnData, must provided if run with more than one slice
+            Only works when `adata` is a list, indicates the biological group of each element
         batch_list
-            Batch list for each AnnData, must be **int** if provided, model will view each slice as a batch if not provided
+            Only works when `adata` is a list, model will view each slice as a batch if not provided
         split_by:
-            Split by column name in `obs` of each AnnData object
+            Only works when `adata` is an `AnnData` object, indicates batch column in `.obs`
         cell_type
-            Cell type column name in `obs` of each AnnData object
+            Cell type column in `.obs` (if `adata` is a list, each element need contain this column)
         preprocess:
-            preprocess the adata object, only for advanced users
+            if `False`, will skip the preprocess steps, only for advanced users
         edge_index
-            use self-defined edge index, only for advanced users
+            use self-defined spatial neighbor edges (PyG format), only for advanced users
         """
         # precess single cell data
         if preprocess:

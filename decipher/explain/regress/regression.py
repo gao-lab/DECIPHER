@@ -155,5 +155,5 @@ def train_regress(
 def ray_train_regress(
     x: Tensor, y: Tensor, config: Dict, save_dir: Path, cell_type: pd.Series
 ) -> None:
-    config["select_gpu"] = False
+    config.fit.select_gpu = False
     return train_regress(x, y, config, save_dir, cell_type)

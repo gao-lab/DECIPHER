@@ -32,12 +32,12 @@ import scanpy as sc
 import rapids_singlecell as rsc
 import squidpy as sq
 import numpy as np
-import spider
-from spider.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
-from spider.plot import split_umap
+import decipher
+from decipher.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
+from decipher.plot import split_umap
 
 # reload scanpy_viz function
-reload(spider.utils)
+reload(decipher.utils)
 
 # %%
 adata_path = "./data/pancancer_filter_anno.h5ad"
@@ -50,7 +50,7 @@ adata.obs.head()
 # # RAPIDS analysis
 
 # %%
-embs = Path('./results/spider_6_10/model/lightning_logs/version_3').glob('*.npy')
+embs = Path('./results/decipher_6_10/model/lightning_logs/version_3').glob('*.npy')
 for file in embs:
     if 'umap' in str(file):
         continue
@@ -69,12 +69,12 @@ adata.obs['cell_type'].value_counts()
 adata = scanpy_viz(adata, keys=['nbr_0'], approx = True)
 
 # %%
-np.save('./results/spider_6_10/model/lightning_logs/version_3/umap_gex_0.npy', adata.obsm['X_umap_gex_0'])
-np.save('./results/spider_6_10/model/lightning_logs/version_3/umap_nbr_0.npy', adata.obsm['X_umap_nbr_0'])
+np.save('./results/decipher_6_10/model/lightning_logs/version_3/umap_gex_0.npy', adata.obsm['X_umap_gex_0'])
+np.save('./results/decipher_6_10/model/lightning_logs/version_3/umap_nbr_0.npy', adata.obsm['X_umap_nbr_0'])
 
 # %%
-adata.obsm['X_umap_gex_0'] = np.load('./results/spider_6_10/model/lightning_logs/version_3/umap_gex_0.npy')
-adata.obsm['X_umap_nbr_0'] = np.load('./results/spider_6_10/model/lightning_logs/version_3/umap_nbr_0.npy')
+adata.obsm['X_umap_gex_0'] = np.load('./results/decipher_6_10/model/lightning_logs/version_3/umap_gex_0.npy')
+adata.obsm['X_umap_nbr_0'] = np.load('./results/decipher_6_10/model/lightning_logs/version_3/umap_nbr_0.npy')
 
 # %%
 adata_plot = adata[~adata.obs['cell_type'].isin(['unknown', 'Hepatocyte', 'pneumocyte']), :]

@@ -54,6 +54,7 @@ events.**
 *.txt
 *.xenium
 *.parquet
+coverage.xml
 
 # folder
 **/conda/

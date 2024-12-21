@@ -28,15 +28,15 @@ def init_trainer(config: Dict, callback: list[Callback] = None, plugins=None) ->
     # save dir
     model_dir = Path(config.work_dir) / config.model_dir
     # device
-    devices = "auto"
-    if not torch.cuda.is_available():
-        config.device = "cpu"
-    else:
-        if config.device_num == 1:
-            if config.device in ["auto", "gpu"] and config.select_gpu:
-                devices = select_free_gpu(config.device_num)
-        else:  # for DDP, it will raise error if specify DDP gpu ids
+    if torch.cuda.is_available() and config.device in ["auto", "gpu", "cuda"]:
+        accelerator = "gpu"
+        if config.device_num == 1 and config.select_gpu:
+            devices = select_free_gpu(config.device_num)
+        else:  # for DDP and rya, it will raise error if specify DDP gpu ids
             devices = config.device_num
+    else:
+        accelerator = "cpu"
+        devices = "auto"
     # callbacks
     progress_bar = TQDMProgressBar(refresh_rate=1)
     early_stop = EarlyStopping(monitor="train/total_loss", patience=config.patient, verbose=True)
@@ -54,18 +54,18 @@ def init_trainer(config: Dict, callback: list[Callback] = None, plugins=None) ->
 
     # precision
     if config.fp16 and torch.cuda.is_available():
-        precision = "16"
+        precision = "16-mixed"
     else:
         precision = None  # auto select
     logger.debug(f"Run model with precision {precision}")
     # strategy
-    strategy = "ddp" if config.device == "gpu" and config.device_num > 1 else "auto"
+    strategy = "ddp" if accelerator == "gpu" and config.device_num > 1 else "auto"
     # logger
     pl_logger = TensorBoardLogger(save_dir=model_dir, default_hp_metric=False)
 
     # init trainer
     return Trainer(
-        accelerator=config.device,
+        accelerator=accelerator,
         devices=devices,
         callbacks=callback_list,
         precision=precision,

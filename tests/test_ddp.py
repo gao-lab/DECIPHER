@@ -1,32 +1,35 @@
 import scanpy as sc
-from addict import Dict
+import torch
+from loguru import logger
 
-from decipher import DECIPHER
-
-
-def test_run_sc_emb(work_dir, config):
-    model = DECIPHER(work_dir, config)
-    model = model.fit_sc()
+from decipher import CFG, DECIPHER
 
 
-def test_run_spatial_emb(work_dir, config):
-    model = DECIPHER(work_dir, config)
-    model = model.fit_spatial()
+def manual_test_ddp():
+    r"""
+    DDP can not be run in pytest pipeline, only for manual test
+    """
+    if torch.cuda.device_count() < 2:
+        logger.error("Only have < 2 gpus, Skip DDP test")
+        return
 
+    work_dir = "./results/decipher_ddp"
+    adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
 
-def test_run_spatial_emb_infer(work_dir, config):
-    model = DECIPHER(work_dir, config)
-    model.inference_spaital()
+    CFG.omics.model.augment.dropout_gex = 0.6
+    CFG.omics.model.epochs = 2
+    CFG.omics.model.plot = True
+    CFG.omics.loader.batch_size = 128
+    CFG.omics.pretrain.epochs = 1
 
-
-def test_ddp(adata, work_dir, config):
-    model = DECIPHER(work_dir, config)
+    model = DECIPHER(work_dir, CFG)
     model.register_data(adata)
     model.fit_ddp(gpus=2)
 
+    # test model recovery
+    model_recover = DECIPHER(work_dir, recover=True)
+    model_recover.fit_ddp(gpus=3)
+
 
 if __name__ == "__main__":
-    args = Dict()
-    work_dir = "./results/ddp"
-    adata = sc.datasets.visium_sge("V1_Human_Lymph_Node")
-    test_ddp(adata, work_dir, args)
+    manual_test_ddp()

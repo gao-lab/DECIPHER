@@ -31,9 +31,9 @@ import numpy as np
 import plotly.express as px
 from sklearn.preprocessing import LabelEncoder
 
-from spider.utils import gex_embedding
-from spider.graphic.knn import knn
-from spider.graphic.build import knn_to_edge_index
+from decipher.utils import gex_embedding
+from decipher.graphic.knn import knn
+from decipher.graphic.build import knn_to_edge_index
 
 
 # %%

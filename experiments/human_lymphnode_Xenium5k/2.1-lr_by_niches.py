@@ -25,13 +25,13 @@ from pathlib import Path
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from spider import Spider, CFG
-from spider.utils import scanpy_viz
-from spider.utils import clip_umap
+from decipher import DECIPHER, CFG
+from decipher.utils import scanpy_viz
+from decipher.utils import clip_umap
 
 # %%
 adata = sc.read_h5ad('./results/adata_analysis.h5ad')
-lr = pd.read_csv('./results/spider/explain_bcell/lr.csv')
+lr = pd.read_csv('./results/decipher/explain_bcell/lr.csv')
 
 
 # %%
@@ -51,7 +51,7 @@ subsets = [x for x in subsets if 'Bcell' in x]
 subsets
 
 # %%
-model = Spider(work_dir="./results/spider", user_cfg=CFG, recover=True)
+model = DECIPHER(work_dir="./results/decipher", user_cfg=CFG, recover=True)
 
 adata.X = adata.layers["counts"].copy()
 adata.var_names_make_unique()
@@ -63,7 +63,7 @@ model.train_gene_select(adata, cell_type='cell_type_niche', subsets=subsets, sub
 # ### Analysis results
 
 # %%
-result_dir = './results/spider/explain_bcell'
+result_dir = './results/decipher/explain_bcell'
 top_k = 15
 batch_dir = list(Path(result_dir).rglob(f'*.npy'))
 batch_dir
@@ -257,7 +257,7 @@ subsets = [x for x in subsets if 'Bcell' in x]
 subsets
 
 # %%
-model = Spider(work_dir="./results/spider", user_cfg=CFG, recover=True)
+model = DECIPHER(work_dir="./results/decipher", user_cfg=CFG, recover=True)
 
 adata.X = adata.layers["counts"].copy()
 adata.var_names_make_unique()
@@ -269,7 +269,7 @@ model.train_gene_select(adata, cell_type='cell_type_niche', subsets=subsets, sub
 # ### Analysis
 
 # %%
-result_dir = './results/spider/explain_bcell_recluster'
+result_dir = './results/decipher/explain_bcell_recluster'
 top_k = 15
 batch_dir = list(Path(result_dir).rglob(f'*.npy'))
 batch_dir

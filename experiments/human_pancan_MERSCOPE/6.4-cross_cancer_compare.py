@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 import rapids_singlecell as rsc
-from spider.utils import manage_gpu, scanpy_viz
+from decipher.utils import manage_gpu, scanpy_viz
 
 # %%
 adata_path = "./results/adata_analysis.h5ad"
@@ -41,7 +41,7 @@ genes.head(3)
 
 # %%
 # write as a function
-result_dir = './results/spider_6_10/explain/'
+result_dir = './results/decipher_6_10/explain/'
 cell_type = 'TAM'
 top_k = 15
 
@@ -255,7 +255,7 @@ sc.pl.embedding_density(tam, basis='umap', groupby='Tissue_1', bg_dotsize=1, fg_
 
 # %%
 # write as a function
-result_dir = './results/spider_6_10/explain/'
+result_dir = './results/decipher_6_10/explain/'
 cell_type = 'B_Plasma_cell'
 top_k = 15
 

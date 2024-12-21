@@ -95,6 +95,11 @@ class GeneSelectMixin:
         # prepare data
         if check_data:
             assert check_nonnegative_integers(adata.X), "Please ensure adata.X is raw count."
+
+        if not lr_mode and adata.n_vars > 3000:
+            logger.warning("Using all genes is not recommended, subset top 3000 HVG only.")
+            sc.pp.highly_variable_genes(adata, n_top_genes=3000, flavor="seurat_v3", subset=True)
+
         if normalize:
             sc.pp.normalize_total(adata, target_sum=1e4)
             sc.pp.log1p(adata)
@@ -105,10 +110,11 @@ class GeneSelectMixin:
             cfg.expr_dim = expr.shape[1]
             lr.to_csv(work_dir / "lr.csv")
         else:
-            cfg.expr_dim = self.x.shape[1]
+            cfg.expr_dim = adata.n_vars
             expr = torch.from_numpy(adata.X.A) if issparse(adata.X) else torch.from_numpy(adata.X)
         nbr_emb = torch.from_numpy(self.nbr_emb)
         center_emb = torch.from_numpy(self.center_emb)
+        assert expr.shape[0] == nbr_emb.shape[0] == center_emb.shape[0], "Data shape not match."
 
         # get cell type data
         cell_types = adata.obs[cell_type].value_counts().index.tolist()
@@ -178,18 +184,18 @@ class GeneSelectMixin:
                     graph_list.extend(batch_graph_list)
 
         # train models
-        assert len(graph_list) == len(
-            save_dir_list
-        ), f"Graphs {len(graph_list)} != save_dirs {len(save_dir_list)}"
-        ray.init()
+        len_graph, len_save_dir = len(graph_list), len(save_dir_list)
+        assert len_graph == len_save_dir, f"Graphs: {graph_list} != save_dirs: {len_save_dir}"
+
         if n_jobs == 1:
             for graph, save_dir in zip(graph_list, save_dir_list):
                 train_GAE(graph, cfg, save_dir, disable_gpu)
         else:
+            ray.init()
             q = [
                 ray_train_GAE.remote(graph, cfg, save_dir, disable_gpu)
                 for graph, save_dir in zip(graph_list, save_dir_list)
             ]
             ray.get(q)
-        ray.shutdown()
+            ray.shutdown()
         logger.info(f"Gene selection finished in {time.time() - start_time:.2f}s")

@@ -40,7 +40,7 @@ from rapids_singlecell.preprocessing._scale import (
     view_to_actual,
 )
 
-from spider.utils import gex_embedding
+from decipher.utils import gex_embedding
 
 # %% [markdown]
 # ## Define some useful functions
@@ -1051,7 +1051,7 @@ adata.obs['dataset'].astype(int).value_counts()
 # # Build edges
 
 # %%
-from spider.graphic.build import build_graph
+from decipher.graphic.build import build_graph
 batch = adata.obs["Index"].astype(int).to_numpy()
 edge_index = build_graph(adata.obsm["spatial"], batch, mode="knn", k=20)
 

@@ -27,8 +27,8 @@ import torch
 import numpy as np
 from torch_geometric.nn import SimpleConv
 
-from spider.graphic.build import build_graph
-from spider.utils import scanpy_viz, gex_embedding
+from decipher.graphic.build import build_graph
+from decipher.utils import scanpy_viz, gex_embedding
 
 
 # %%

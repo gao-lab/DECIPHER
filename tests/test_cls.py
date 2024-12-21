@@ -5,44 +5,91 @@ from decipher import DECIPHER
 from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, GetRunTime, global_seed
 
 
+def get_adata() -> sc.AnnData:
+    adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
+    # random sample 500 cells
+    # adata = adata[np.random.choice(adata.obs.index, 500), :].copy()
+    adata.layers["counts"] = adata.X.copy()
+    adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
+    adata.obs_names_make_unique()
+    adata.var_names_make_unique()
+    return adata.copy()
+
+
+def get_adata_2() -> sc.AnnData:
+    adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_2")
+    # random sample 600 cells
+    # adata = adata[np.random.choice(adata.obs.index, 600), :].copy()
+    adata.layers["counts"] = adata.X.copy()
+    adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
+    adata.obs_names_make_unique()
+    adata.var_names_make_unique()
+    return adata.copy()
+
+
 @GetRunTime
-def test_decipher_omics_single(h5ad_path: str = None):
+def test_decipher_single_slice():
+    adata = get_adata()
+
     global_seed(0)
     CFG.omics.model.augment.dropout_gex = 0.6
-    CFG.omics.model.epochs = 3
+    CFG.omics.model.epochs = 2
     CFG.omics.model.plot = True
     CFG.omics.loader.batch_size = 128
     CFG.omics.pretrain.force = True
     CFG.omics.pretrain.epochs = 1
     GENESELECT_CFG.gae_epochs = 3
-    REGRESS_CFG.fit.epochs = 3
+    REGRESS_CFG.fit.epochs = 2
+    work_dir = "./results/decipher_single_slice"
 
-    adata = (
-        sc.datasets.visium_sge("V1_Human_Lymph_Node") if h5ad_path is None else sc.read(h5ad_path)
-    )
-    adata.layers["counts"] = adata.X.copy()
-    # random choose cell type from ['a', 'b', 'c']
-    adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
-
-    model = DECIPHER(work_dir="./results/decipher_omics_single", user_cfg=CFG)
+    model = DECIPHER(work_dir=work_dir, user_cfg=CFG)
     model.register_data(adata)
+
     model.fit_omics()
     model.visualize()
+
     adata.X = adata.layers["counts"].copy()
-    model.train_gene_select(adata, cell_type="cell_type")
+    model.train_gene_select(adata, cell_type="cell_type", min_cells=10)
     model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True)
+
+    # test the recovery of the model
+    model_recover = DECIPHER(work_dir=work_dir, recover=True)
+    CFG.omics.pretrain.force = False
+    model_recover.fit_omics()
 
 
 @GetRunTime
-def test_decipher_omics_multi(adata, adata_2):
-    CFG.omics.model.epochs = 3
-    work_dir = "./results/decipher_omics_multi"
-    model = DECIPHER(work_dir=work_dir, recover=True)
-    model.register_data([adata, adata_2], group_list=["Section1", "Section2"])
+def test_decipher_multi_slices():
+    adata_1, adata_2 = get_adata(), get_adata_2()
+    adata = adata_1.concatenate(adata_2)
+
+    global_seed(0)
+    CFG.omics.model.augment.dropout_gex = 0.6
+    CFG.omics.model.epochs = 2
+    CFG.omics.model.plot = True
+    CFG.omics.loader.batch_size = 128
+    CFG.omics.pretrain.force = True
+    CFG.omics.pretrain.epochs = 1
+    GENESELECT_CFG.gae_epochs = 3
+    REGRESS_CFG.fit.epochs = 2
+    work_dir = "./results/decipher_multi_slices"
+
+    model = DECIPHER(work_dir=work_dir, user_cfg=CFG)
+    model.register_data([adata_1, adata_2], group_list=["batch_1", "batch_2"])
+
     model.fit_omics()
     model.visualize()
 
+    adata.X = adata.layers["counts"].copy()
+    model.train_gene_select(adata, cell_type="cell_type", min_cells=10, n_jobs=1)
+    model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True)
+
+    # test the recovery of the model
+    model_recover = DECIPHER(work_dir=work_dir, recover=True)
+    CFG.omics.pretrain.force = False
+    model_recover.fit_omics()
+
 
 if __name__ == "__main__":
-    test_decipher_omics_single()
-    # test_decipher_omics_multi()
+    test_decipher_single_slice()
+    test_decipher_multi_slices()

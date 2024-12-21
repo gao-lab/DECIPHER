@@ -11,13 +11,10 @@ import torch
 import torch_geometric.transforms as T
 from addict import Dict
 from loguru import logger
-from pytorch_lightning import LightningModule
 from torch import Tensor, nn
 from torch_geometric.data import Batch, Data
-from torch_geometric.data.lightning import LightningLinkData
 from torch_geometric.nn import GAE, MLP
 
-from ...nn.trainer import fit_and_inference
 from ...utils import select_free_gpu
 
 
@@ -44,119 +41,13 @@ class SelectEncoder(nn.Module):
         return expr * gene_mask, l1_loss
 
 
-class GAE_lightning(LightningModule):
-    r"""
-    Graph autoencoder with lightning wrapper
-    """
-
-    def __init__(self, gae: GAE, lr: float = 1e-3, l1_weight: float = 1) -> None:
-        super().__init__()
-        self.model = gae
-        self.lr = lr
-        self.l1_weight = l1_weight
-
-    def training_step(self, batch: Data, batch_idx: int) -> Tensor:
-        x, expr = batch.x, batch.expr
-
-        z, l1_loss = self.model.encode(x, expr)
-        recon_loss = self.model.recon_loss(z, batch.pos_edge_label_index)
-        loss = recon_loss + l1_loss * self.l1_weight
-        self.log("total_loss", loss, prog_bar=True)
-        return loss
-
-    def test_step(self, batch: Data, batch_idx: int) -> None:
-        x, expr = batch.x, batch.expr
-        z, _ = self.model.encode(x, expr)
-        auc, ap = self.model.test(z.float(), batch.pos_edge_label_index, batch.neg_edge_label_index)
-        self.log_dict({"auc": auc, "ap": ap}, prog_bar=True)
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        return optimizer
-
-
 @ray.remote(num_gpus=1, num_cpus=8)
-def ray_train_GAE(
-    graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False, mini_batch: bool = False
-):
+def ray_train_GAE(graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False):
     config["select_gpu"] = False
-    return train_GAE(graph, config, save_dir, disable_gpu, mini_batch)
+    return train_GAE(graph, config, save_dir, disable_gpu)
 
 
 def train_GAE(
-    graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False, mini_batch: bool = False
-):
-    r"""
-    Train graph autoencoder
-
-    Parameters
-    ----------
-    graph
-        neighbor embedding k-nn graph
-    config
-        config for train GAE
-    save_dir
-        save directory
-    disable_gpu
-        if disable gpu
-    mini_batch
-        if use mini-batch
-    """
-    if mini_batch:
-        logger.warning("Train GAE with mini-batch is a experimental feature without test.")
-        config.fit.model_dir = str(save_dir)
-        config.fit.work_dir = config.work_dir
-        return train_GAE_mini_batch(graph, config, save_dir)
-    else:
-        return train_GAE_whole(graph, config, save_dir, disable_gpu)
-
-
-def train_GAE_mini_batch(graph: Data, config: Dict, save_dir: Path) -> None:
-    r"""
-    Train graph autoencoder with mini-batch
-
-    Parameters
-    ----------
-    graph
-        neighbor embedding k-nn graph
-    config
-        config for train GAE
-    save_dir
-        save directory
-    """
-    config.gae_fit.model_dir = str(save_dir)
-    # model
-    pl_model = GAE_lightning(GAE(SelectEncoder(config)), config.lr_base, config.l1_weight)
-    # data
-    # FIXME: split train, val and test
-    train_mask = torch.ones(graph.num_edges, dtype=torch.bool)
-    val_mask = torch.ones(graph.num_edges, dtype=torch.bool)
-    test_mask = torch.ones(graph.num_edges, dtype=torch.bool)
-    pl_data = LightningLinkData(
-        graph,
-        input_train_edges=train_mask,
-        input_val_edges=val_mask,
-        input_test_edges=test_mask,
-        subgraph_type="bidirectional",
-        disjoint=True,
-        eval_loader_kwargs={"drop_last": False},
-        # for LinkNeighborLoader
-        num_neighbors=config.num_neighbors,
-        **config.gae_loader,
-    )
-    # train
-    fit_and_inference(pl_model, pl_data, config.gae_fit)
-    # inference
-    with torch.inference_mode():
-        gene_mask = pl_model.model.encode(graph.x, graph.expr, return_mask=True)
-    # save
-    save_dir = Path(save_dir)
-    logger.info(f"Save explain model to {save_dir}")
-    save_dir.mkdir(parents=True, exist_ok=True)
-    np.save(save_dir / "gene_mask.npy", gene_mask.float().detach().cpu().numpy())
-
-
-def train_GAE_whole(
     graph: Data | Batch, config: Dict, save_dir: Path, disable_gpu: bool = False, fp16: bool = True
 ) -> None:
     r"""
@@ -165,7 +56,7 @@ def train_GAE_whole(
     Parameters
     ----------
     graph
-        neighbor embedding k-nn graph
+        k-nn graph of spatial embedding
     config
         config for train GAE
     save_dir

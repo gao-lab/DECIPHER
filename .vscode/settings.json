@@ -23,7 +23,9 @@
     "**/*.deprecated/**": true,
     "**/*.bak/**": true,
     "**/*.old/**": true,
-    "**/._**": true
+    "**/._**": true,
+    "coverage.xml": true,
+    ".coverage**": true,
   },
   "jupyter.jupyterServerType": "local",
   "python.tensorboard.logDirectory": "logs/",
@@ -42,12 +44,5 @@
     ".vscode/*.py",
     "**==.py"
   ],
-  "python.analysis.ignore": [
-    "experiment/"
-  ],
-  "python.analysis.exclude": [
-    "**==.py",
-    "experiment/**"
-  ],
-  "python.analysis.typeCheckingMode": "off"
+  "r.lsp.promptToInstall": false
 }

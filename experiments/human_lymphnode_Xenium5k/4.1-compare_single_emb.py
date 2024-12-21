@@ -16,7 +16,7 @@
 # %% [markdown]
 # # Compare with simple embedding in find LR
 #
-# We use Spider spatial embedding to define spatial cluster and then find the different ligand-receptors across the clusters.
+# We use DECIPHER spatial embedding to define spatial cluster and then find the different ligand-receptors across the clusters.
 
 # %%
 import os
@@ -27,9 +27,9 @@ import torch
 import numpy as np
 from torch_geometric.nn import SimpleConv
 
-from spider.explain.gene.lr import get_lr_expr
-from spider.graphic.build import build_graph
-from spider.utils import scanpy_viz, gex_embedding
+from decipher.explain.gene.lr import get_lr_expr
+from decipher.graphic.build import build_graph
+from decipher.utils import scanpy_viz, gex_embedding
 
 
 # %%
@@ -52,10 +52,10 @@ np.save('./results/lr_baseline/lr_expr.npy', expr)
 lr.to_csv('./results/lr_baseline/lr_filter.csv')
 
 # %% [markdown]
-# ## Spider embbeding
+# ## DECIPHER embbeding
 
 # %%
-adata.obsm['X_nbr'] =  np.load('./results/spider/nbr_emb.npy')
+adata.obsm['X_nbr'] =  np.load('./results/decipher/nbr_emb.npy')
 adata = scanpy_viz(adata, keys = ['nbr'])
 
 # %% [markdown]
