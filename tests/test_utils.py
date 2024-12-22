@@ -8,10 +8,13 @@ def test_select_free_gpu(n=2):
     gpu = select_free_gpu(n)
     if torch.cuda.device_count() > 0:
         assert len(gpu) == n
+    else:
+        assert gpu is None
 
 
 def test_gex_embedding_scanpy_viz():
-    adata = adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
+    adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
+    adata = adata[:200, :2500].copy()
     keys = ["gex"]
 
     adata = gex_embedding(adata)

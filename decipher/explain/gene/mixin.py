@@ -191,7 +191,7 @@ class GeneSelectMixin:
             for graph, save_dir in zip(graph_list, save_dir_list):
                 train_GAE(graph, cfg, save_dir, disable_gpu)
         else:
-            ray.init()
+            ray.init(ignore_reinit_error=True)
             q = [
                 ray_train_GAE.remote(graph, cfg, save_dir, disable_gpu)
                 for graph, save_dir in zip(graph_list, save_dir_list)

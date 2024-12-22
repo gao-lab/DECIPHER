@@ -129,12 +129,9 @@ class RegressMixin:
                         regress_dirs.append(f"regress_batch:{_batch}_all")
 
         # train models
-        ray.init()
-        queue = train_regress_parallel(
+        train_regress_parallel(
             xy_list, cfg_explain, regress_dirs, n_jobs, reverse_regress, adata.obs[cell_type]
         )
-        ray.get(queue)
-        ray.shutdown()
         self.explain_df = merge_regress_results(explain_work_dir, start_time)
         logger.success(f"Explain model training finished in {time.time() - start_time:.2f}s.")
 
@@ -188,8 +185,10 @@ def train_regress_parallel(
         for xy, cfg, save_dir in zip(xy_list, cfg_explain_list, regress_dirs):
             train_regress(*xy, cfg, save_dir, cell_type)
     else:
+        ray.init(ignore_reinit_error=True)
         queue = [
             ray_train_regress.remote(*xy, cfg, save_dir, cell_type)
             for xy, cfg, save_dir in zip(xy_list, cfg_explain_list, regress_dirs)
         ]
-        return queue
+        ray.get(queue)
+        ray.shutdown()

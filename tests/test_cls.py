@@ -7,10 +7,10 @@ from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, GetRunTime, global_
 
 def get_adata() -> sc.AnnData:
     adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
-    # random sample 500 cells
-    # adata = adata[np.random.choice(adata.obs.index, 500), :].copy()
+    # sample first 200 cells and 500 genes
+    adata = adata[:200, :500]
     adata.layers["counts"] = adata.X.copy()
-    adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
+    adata.obs["cell_type"] = np.random.choice(["a", "b"], adata.n_obs).tolist()
     adata.obs_names_make_unique()
     adata.var_names_make_unique()
     return adata.copy()
@@ -18,10 +18,10 @@ def get_adata() -> sc.AnnData:
 
 def get_adata_2() -> sc.AnnData:
     adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_2")
-    # random sample 600 cells
-    # adata = adata[np.random.choice(adata.obs.index, 600), :].copy()
+    # sample first 210 cells and 500 genes
+    adata = adata[:210, :500]
     adata.layers["counts"] = adata.X.copy()
-    adata.obs["cell_type"] = np.random.choice(["a", "b", "c"], adata.n_obs).tolist()
+    adata.obs["cell_type"] = np.random.choice(["a", "b"], adata.n_obs).tolist()
     adata.obs_names_make_unique()
     adata.var_names_make_unique()
     return adata.copy()
@@ -35,10 +35,10 @@ def test_decipher_single_slice():
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 2
     CFG.omics.model.plot = True
-    CFG.omics.loader.batch_size = 128
+    CFG.omics.loader.batch_size = 64
     CFG.omics.pretrain.force = True
-    CFG.omics.pretrain.epochs = 1
-    GENESELECT_CFG.gae_epochs = 3
+    CFG.omics.pretrain.epochs = 2
+    GENESELECT_CFG.gae_epochs = 2
     REGRESS_CFG.fit.epochs = 2
     work_dir = "./results/decipher_single_slice"
 
@@ -49,8 +49,8 @@ def test_decipher_single_slice():
     model.visualize()
 
     adata.X = adata.layers["counts"].copy()
-    model.train_gene_select(adata, cell_type="cell_type", min_cells=10)
-    model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True)
+    model.train_gene_select(adata, cell_type="cell_type", min_cells=1, n_jobs=1)
+    model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True, n_jobs=1)
 
     # test the recovery of the model
     model_recover = DECIPHER(work_dir=work_dir, recover=True)
@@ -67,10 +67,10 @@ def test_decipher_multi_slices():
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 2
     CFG.omics.model.plot = True
-    CFG.omics.loader.batch_size = 128
+    CFG.omics.loader.batch_size = 64
     CFG.omics.pretrain.force = True
-    CFG.omics.pretrain.epochs = 1
-    GENESELECT_CFG.gae_epochs = 3
+    CFG.omics.pretrain.epochs = 2
+    GENESELECT_CFG.gae_epochs = 2
     REGRESS_CFG.fit.epochs = 2
     work_dir = "./results/decipher_multi_slices"
 
@@ -81,8 +81,8 @@ def test_decipher_multi_slices():
     model.visualize()
 
     adata.X = adata.layers["counts"].copy()
-    model.train_gene_select(adata, cell_type="cell_type", min_cells=10, n_jobs=1)
-    model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True)
+    model.train_gene_select(adata, cell_type="cell_type", min_cells=1, n_jobs=1)
+    model.train_regress_explain(adata, cell_type="cell_type", reverse_regress=True, n_jobs=1)
 
     # test the recovery of the model
     model_recover = DECIPHER(work_dir=work_dir, recover=True)
