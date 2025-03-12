@@ -170,7 +170,7 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
         self.center_emb = center_emb_pretrain if center_emb_pretrain else center_emb
         # as float
         self.center_emb = self.center_emb.astype(np.float32)
-        self.center_emb = self.center_emb.astype(np.float32)
+        self.nbr_emb = self.nbr_emb.astype(np.float32)
         # save embeddings
         np.save(self.work_dir / "center_emb.npy", self.center_emb)
         np.save(self.work_dir / "nbr_emb.npy", self.nbr_emb)

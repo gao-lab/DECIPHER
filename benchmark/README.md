@@ -13,6 +13,7 @@ All datasets used in benchmark are public available. Here is a summary:
 
 ## Methods
 - DECIPHER
+- scNiche
 - SLAT
 - BANKSY
 - STAGATE
@@ -34,7 +35,7 @@ Download the datasets and move them into `./input` folder.
 
 > Take about 12 hours when using 32 A100 GPUs.
 
-We use `snakemake` to run benchmark workflows in Slurm cluster. Firstly, you need modify `partition` name in [`config`](./profiles/hpc/hpc.yaml) according to your cluster settings, then run:
+We use `snakemake` to run benchmark workflows in Slurm cluster. Firstly, you need modify HPC config in [`config`](./profiles/hpc/hpc.yaml) according to your HPC settings, then run:
 
 ```sh
 snakemake -j 500 --profile profiles/hpc

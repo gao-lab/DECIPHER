@@ -28,6 +28,66 @@ rule run_decipher:
         """
 
 
+rule run_scniche:
+    input:
+        data = "{path}/data.h5ad",
+        script = "workflow/scripts/run_scniche.py",
+    output:
+        center_emb = "{path}/scniche/center_emb.npy",
+        nbr_emb = "{path}/scniche/nbr_emb.npy",
+        time = "{path}/scniche/time.yaml",
+    params:
+        notebook_in = "workflow/scripts/run_scniche.ipynb",
+        notebook_out = "{path}/scniche/run_scniche.ipynb",
+        work_dir = "{path}/scniche",
+    log:
+        "{path}/scniche/run_scniche.log",
+    threads:4
+    resources: gpu=1
+    shell:
+        """
+        jupytext --to notebook {input.script}
+
+        timeout {config[timeout]} papermill \
+            -p input_file {input.data} \
+            -p center_emb_file {output.center_emb} \
+            -p nbr_emb_file {output.nbr_emb} \
+            -p time_file {output.time} \
+        {params.notebook_in} {params.notebook_out} \
+        > {log} 2>&1
+        """
+
+
+rule run_scniche_raw:
+    input:
+        data = "{path}/data.h5ad",
+        script = "workflow/scripts/run_scniche_raw.py",
+    output:
+        center_emb = "{path}/scniche_raw/center_emb.npy",
+        nbr_emb = "{path}/scniche_raw/nbr_emb.npy",
+        time = "{path}/scniche_raw/time.yaml",
+    params:
+        notebook_in = "workflow/scripts/run_scniche_raw.ipynb",
+        notebook_out = "{path}/scniche_raw/run_scniche_raw.ipynb",
+        work_dir = "{path}/scniche_raw",
+    log:
+        "{path}/scniche_raw/run_scniche_raw.log",
+    threads:4
+    resources: gpu=1
+    shell:
+        """
+        jupytext --to notebook {input.script}
+
+        timeout {config[timeout]} papermill \
+            -p input_file {input.data} \
+            -p center_emb_file {output.center_emb} \
+            -p nbr_emb_file {output.nbr_emb} \
+            -p time_file {output.time} \
+        {params.notebook_in} {params.notebook_out} \
+        > {log} 2>&1
+        """
+
+
 rule run_banksy:
     input:
         data = "{path}/data.h5ad",

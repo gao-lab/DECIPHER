@@ -415,6 +415,8 @@ def manage_gpu(gpu_id: int, memory_strategy: str | None = None):
             pool_allocator=pool_allocator,
             devices=gpu_id,
         )
+    else:
+        rmm.reinitialize(devices=gpu_id)
     cupy.cuda.set_allocator(rmm_cupy_allocator)
     cupy.cuda.Device(gpu_id).use()
     logger.info(f"Using GPU {gpu_id} and {memory_strategy} memory strategy.")
@@ -525,18 +527,13 @@ def gex_embedding(
     Input can not be the View of anndata
     """
     logger.info("Gene expression embedding...")
-    assert method.lower() in [
-        "pca",
-        "harmony",
-    ], f"Method {method} not supported"
+    assert method.lower() in ["pca", "harmony"], f"Method {method} not supported"
     if batch_key is not None:
         method = "harmony"
         logger.info(f"Use {method} for batch correction.")
 
     forbid_rapids = forbid_rapids if RSC_FLAG else True
     if not forbid_rapids:
-        # Initialize Rapids
-        rmm.reinitialize()
         if gpu_id == "auto":
             gpu_id = select_free_gpu(1)[0]
         else:
@@ -577,10 +574,11 @@ def gex_embedding(
 
     sc_.pp.normalize_total(adata, target_sum=1e4)
     sc_.pp.log1p(adata)
-    sc_.pp.scale(adata, max_value=10)  # GPU memory
+    sc_.pp.scale(adata, max_value=10)  # Use a lot GPU memory
     if rapids_after_scale and not forbid_rapids:
         rsc.get.anndata_to_GPU(adata)
         sc_ = rsc
+
     sc_.pp.pca(adata, n_comps=n_comps)
     if method.lower() == "pca":
         adata.obsm["X_gex"] = adata.obsm["X_pca"]
@@ -595,7 +593,7 @@ def gex_embedding(
         return adata.obsm["X_gex"]
 
     if viz:
-        sc_.pp.neighbors(adata, use_rep="X_gex")
+        sc_.pp.neighbors(adata, use_rep="X_gex")  # TODO: support approx neighbor, add n_neighbors
         sc_.tl.leiden(adata, resolution=resolution)
         sc_.tl.umap(adata)
 
@@ -713,7 +711,6 @@ def scanpy_viz(
 
     # select gpu
     if RSC_FLAG:
-        rmm.reinitialize()
         n_jobs = len(viz_adatas) if n_jobs == -1 else n_jobs
         if gpu_id is None:
             gpu_ids = select_free_gpu(len(viz_adatas))

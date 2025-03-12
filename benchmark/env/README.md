@@ -34,6 +34,15 @@ pip install .
 # scib (with anndata2ri and rpy2)
 pip install scib anndata2ri rpy2
 
+# scNiche
+git clone https://github.com/ZJUFanLab/scNiche
+cd scNiche
+# NOTE: you should install DGL according to your torch and CUDA version
+pip install  dgl -f https://data.dgl.ai/wheels/torch-2.3/cu121/repo.html
+python setup.py build
+python setup.py install
+
+
 # export env
 mamba  env export | grep -v "^prefix: " | grep -v "^name: " > conda.yaml
 ```

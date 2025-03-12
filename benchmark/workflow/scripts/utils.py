@@ -18,6 +18,12 @@ def filter_pool(pool) -> list[str]:
     for file in pool:
         if 'stagate' in file and 'merfish' in file:
             continue
+        
+        if 'scniche_raw' in file and 'merfish' in file:
+            continue
+
+        if 'scniche_raw' in file and 'xenium' in file:
+            continue
 
         if Path(file).exists():
             print(f"File {file} exists")
