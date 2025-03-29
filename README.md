@@ -26,10 +26,18 @@
 > [!IMPORTANT]
 > Requires Python >= 3.10 and CUDA-enabled GPU (CPU-only device is not recommended).
 
-We recommend to install `cell-decipher` to a new conda environment with [RAPIDS](https://docs.rapids.ai/install) dependencies.
+We recommend to install `cell-decipher` to a new conda environment:
 
 ```sh
-mamba create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=24.04 cuda-version=11.8 cudnn cutensor cusparselt -y && conda activate decipher
+mamba create -n decipher python==3.11 -c conda-forge -y && conda activate decipher
+pip install cell-decipher
+install_pyg_dependencies
+```
+
+(Optional) You can install [RAPIDS](https://docs.rapids.ai/install) to accelerate visualization.
+
+```sh
+mamba create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=24.12 'cuda-version>=12.0,<=12.2' -y && conda activate decipher
 pip install cell-decipher
 install_pyg_dependencies
 ```
@@ -87,7 +95,9 @@ sc.pl.umap(adata, color=['region'])
 
 
 ## Citation
-In coming.
+
+*High-fidelity disentangled cellular embeddings for large-scale heterogeneous spatial omics via DECIPHER* ([biorxiv](https://www.biorxiv.org/content/10.1101/2024.11.29.626126v1) 2024)
+
 
 > If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/) and [**experiments**](./experiments/) folder.
 
