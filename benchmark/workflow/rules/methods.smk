@@ -28,6 +28,50 @@ rule run_decipher:
         """
 
 
+rule run_graphst:
+    input:
+        data = "{path}/data.h5ad",
+        script = "workflow/scripts/run_graphst.py",
+    output:
+        center_emb = "{path}/graphst/center_emb.npy",
+        nbr_emb = "{path}/graphst/nbr_emb.npy",
+        time = "{path}/graphst/time.yaml",
+    params:
+        notebook_in = "workflow/scripts/run_graphst.ipynb",
+        notebook_out = "{path}/graphst/run_graphst.ipynb",
+        work_dir = "{path}/graphst",
+    log:
+        "{path}/graphst/run_graphst.log",
+    threads:4
+    resources: gpu=1
+    shell:
+        """
+        # only used when run locally
+        # sleep 0."$RANDOM"
+        # ID=$(tail -n 1 {config[gpu_id_file]})
+        # sed -i '$d' {config[gpu_id_file]}
+        # echo "Selected GPU: $ID"
+        # export CUDA_VISIBLE_DEVICES=$ID
+
+        jupytext --to notebook {input.script}
+        timeout {config[timeout]} papermill \
+            -p input_file {input.data} \
+            -p center_emb_file {output.center_emb} \
+            -p nbr_emb_file {output.nbr_emb} \
+            -p time_file {output.time} \
+        {params.notebook_in} {params.notebook_out} \
+        > {log} 2>&1 ||
+            echo "Error in papermill"
+            # write back the GPU ID to the file
+            # echo $ID >> {config[gpu_id_file]}
+            # unset CUDA_VISIBLE_DEVICES
+
+        # add back the GPU ID to the list
+        # echo $ID >> {config[gpu_id_file]}
+        # unset CUDA_VISIBLE_DEVICES
+        """
+
+
 rule run_scniche:
     input:
         data = "{path}/data.h5ad",

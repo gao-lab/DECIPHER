@@ -25,6 +25,12 @@ def filter_pool(pool) -> list[str]:
         if 'scniche_raw' in file and 'xenium' in file:
             continue
 
+        if 'graphst' in file and 'merfish' in file:
+            continue
+
+        if 'graphst' in file and 'xenium' in file:
+            continue
+
         if Path(file).exists():
             print(f"File {file} exists")
             if IGNORE_FINISHED:

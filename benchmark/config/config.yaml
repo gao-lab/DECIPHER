@@ -30,6 +30,7 @@ method:
   - slat
   - scniche
   - scniche_raw
+  - graphst
   # # non-spatial
   - harmony
   - scvi

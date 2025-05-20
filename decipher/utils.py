@@ -262,7 +262,7 @@ def install_pyg_dep(torch_version: str | None = None, cuda_version: str | None =
     run(cmd, shell=True)
 
 
-def select_free_gpu(n: int = 1) -> list[int] | None:
+def select_free_gpu(n: int = 1) -> list[int | None]:
     r"""
     Get torch computation device automatically
 
@@ -297,7 +297,7 @@ def select_free_gpu(n: int = 1) -> list[int] | None:
         return n_devices
     except pynvml.NVMLError:  # pragma: no cover
         logger.warning("No GPU available.")
-        return None
+        return [None]
 
 
 def global_seed(seed: int, cuda_deterministic: bool = False) -> None:
@@ -587,8 +587,10 @@ def gex_embedding(
             rsc.pp.harmony_integrate(adata, key=batch_key)
             adata.obsm["X_gex"] = adata.obsm["X_pca_harmony"]
         elif harmony_version in ["pytorch", "torch"]:
+            pca_emb = adata.obsm["X_pca"]
+            if not isinstance(pca_emb, np.ndarray):
+                pca_emb = pca_emb.to_numpy()
             adata.obsm["X_gex"] = harmony_pytorch(adata.obsm["X_pca"], adata.obs, batch_key, seed)
-
     if emb_only:
         return adata.obsm["X_gex"]
 
