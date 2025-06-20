@@ -92,7 +92,7 @@ sc.pl.umap(adata, color=['region'])
 | [Multi-slices with Batch Effects](./docs/tutorials/2-remove_batch.ipynb)     | Tutorial on how to apply DECIPHER to multiple slices with batch effects | [![Open In Colab](https://img.shields.io/badge/Colab-PyTorch-blue?logo=googlecolab)](https://colab.research.google.com/drive/1eLJeRDZFq2tlDUWpETlSxVUdzRv9CeSD?usp=sharing) |
 | [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) | Tutorial on how to identify ligand-receptors which related wtih cells’ localization based on DECIPHER embeddings | Insufficient resources |
 | [Multi-GPUs Training](./docs/tutorials.md#multi-gpu-training)                        | Tutorial on how to use DECIPHER with multi-GPUs on spatial atlas | Insufficient resources |
-
+| [More technologies](./docs/tutorials/4-more_techs.ipynb)                        | Tutorial on how to use DECIPHER with multiple spatial technologies | Insufficient resources |
 
 ## Citation
 

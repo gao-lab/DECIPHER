@@ -8,12 +8,14 @@ You can check basic usages of DECIPHER model in following notebooks:
 1. **Train model**: shows how to train DECIPHER model on spatial omics data and get high-fidelity disentangled omics and spatial embedding.
 2. **Remove batch effects**: shows how to remove batch effects from spatial omics data.
 3. **Identify localization related LRs**: shows how to identity cell localization related ligand-receptor pairs via DECIPHER disentangled embeddings.
+4. **More techniques**: shows how to use DECIPHER in other spatial techniques, such as CosMx and CODEX.
 
 ```{eval-rst}
 .. nbgallery::
     tutorials/1-train_model.ipynb
     tutorials/2-remove_batch.ipynb
     tutorials/3-select_LRs.ipynb
+    tutorials/4-more_techs.ipynb
 ```
 
 ## Advanced topics

@@ -112,6 +112,7 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
             if split_by is not None:
                 adata.obs["_batch"] = LabelEncoder().fit_transform(adata.obs[split_by])
         self.x = self.x.toarray() if isinstance(self.x, sps.csr_matrix) else self.x
+        self.x = self.x.astype(np.float32)
         np.save(self.work_dir / "x.npy", self.x)
         self.coords = adata.obsm["spatial"]
         self.meta = adata.obs
