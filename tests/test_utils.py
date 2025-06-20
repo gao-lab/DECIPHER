@@ -9,7 +9,7 @@ def test_select_free_gpu(n=2):
     if torch.cuda.device_count() > 0:
         assert len(gpu) == n
     else:
-        assert gpu is None
+        assert gpu == [None] * n
 
 
 def test_gex_embedding_scanpy_viz():

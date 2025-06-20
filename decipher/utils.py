@@ -297,7 +297,7 @@ def select_free_gpu(n: int = 1) -> list[int | None]:
         return n_devices
     except pynvml.NVMLError:  # pragma: no cover
         logger.warning("No GPU available.")
-        return [None]
+        return [None] * n
 
 
 def global_seed(seed: int, cuda_deterministic: bool = False) -> None:
