@@ -121,8 +121,6 @@ CFG.omics.model.update(
     emb_dim=128,
     gex_dims=[-1, 256, 32],
     prj_dims=[32, 32, 32],
-    marker_list=None,
-    save_h5ad=False,
 )
 CFG.omics.pretrain = Dict(lr_base=1e-2, lr_min=1e-3, epochs=3, model_dir="pretrain", force=False)
 

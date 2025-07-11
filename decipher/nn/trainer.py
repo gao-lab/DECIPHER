@@ -1,5 +1,5 @@
 r"""
-Trainer of contrastive learning
+Trainer
 """
 import time
 from pathlib import Path
@@ -38,14 +38,13 @@ def init_trainer(config: Dict, callback: list[Callback] = None, plugins=None) ->
         accelerator = "cpu"
         devices = "auto"
     # callbacks
-    progress_bar = TQDMProgressBar(refresh_rate=1)
+    progress_bar = TQDMProgressBar(refresh_rate=5)
     early_stop = EarlyStopping(monitor="train/total_loss", patience=config.patient, verbose=True)
     model_checkpoint = ModelCheckpoint(
         dirpath=model_dir,
         monitor="train/total_loss",
         mode="min",
-        save_top_k=3,
-        verbose=True,
+        save_top_k=2,
     )
     lr_monitor = LearningRateMonitor(logging_interval="step")
     callback_list = [progress_bar, early_stop, model_checkpoint, lr_monitor]

@@ -93,11 +93,11 @@ plt.xlabel('Score of B cell')
 plt.ylabel('Gene')
 
 # %%
-gene_df.head(20).index.to_frame().to_csv('./gene_list_top.csv', index=False)
-gene_df.index.to_frame().to_csv('./gene_list.csv', index=False)
+gene_df_tcell.head(20).index.to_frame().to_csv('./gene_list_top.csv', index=False)
+gene_df_tcell.index.to_frame().to_csv('./gene_list.csv', index=False)
 
 # %%
-gene_df['counts'].hist(bins=100)
+gene_df_tcell['counts'].hist(bins=100)
 
 # %% [markdown]
 # ## T cell analysis

@@ -19,13 +19,6 @@ from torch.utils.data import DataLoader, Dataset
 from torch_geometric.data import Data
 from torch_geometric.data.lightning import LightningNodeData
 
-try:
-    import cupy as cp
-
-    CUPY_AVAILABLE = True
-except ImportError:
-    CUPY_AVAILABLE = False
-
 from ..graphic.knn import knn
 from ..utils import l2norm
 
@@ -175,7 +168,7 @@ class LightningScMNNData(LightningDataModule):
             combined_loader = CombinedLoader(loaders, mode="max_size_cycle")
             return combined_loader
 
-    def val_dataloader(self):
+    def test_dataloader(self):
         val_cfg = deepcopy(self.loader_config)
         val_cfg.update({"batch_size": 1024, "shuffle": False, "drop_last": False})
         return DataLoader(self.val_dataset, **val_cfg)
@@ -275,7 +268,7 @@ def svd(x: np.ndarray, y: np.ndarray, k_components: int = 20) -> tuple[np.ndarra
     """
     logger.debug(f"x shape: {x.shape}, y shape: {y.shape}")
     if x.shape[0] > 1_000_000 or y.shape[0] > 1_000_000:
-        logger.debug("Use harmony for large dataset.")
+        logger.debug("Use harmony-based SVD for large dataset.")
         from harmony import harmonize
 
         # batch
@@ -287,22 +280,16 @@ def svd(x: np.ndarray, y: np.ndarray, k_components: int = 20) -> tuple[np.ndarra
         # harmonize
         z_norm = harmonize(z, batch, "batch", use_gpu=True)
         return z_norm
-    elif x.shape[0] > 200_000 or y.shape[0] > 200_000:
-        logger.debug("Use CPU for middle dataset")
-        dot = torch.from_numpy(x) @ torch.from_numpy(y).T  # faster than np
+
+    try:
+        dot = torch.from_numpy(x).cuda().half() @ torch.from_numpy(y).T.cuda().half()
+        dot = dot.cpu().float().numpy()
+        logger.info("Use CUDA for small dataset")
+    except:  # noqa
+        logger.error(f"CUDA failed: {x.shape}, {y.shape}, use CPU instead.")
+        dot = torch.from_numpy(x) @ torch.from_numpy(y).T
         dot = dot.numpy()
-    else:
-        try:
-            dot = torch.from_numpy(x).cuda().half() @ torch.from_numpy(y).T.cuda().half()
-            if CUPY_AVAILABLE:
-                dot = cp.asarray(dot.to(torch.float32)).get()
-            else:
-                dot = dot.cpu().float().numpy()
-            logger.info("Use CUDA for small dataset")
-        except:  # noqa
-            logger.error("CUDA failed")
-            dot = torch.from_numpy(x) @ torch.from_numpy(y).T
-            dot = dot.numpy()
+    torch.cuda.empty_cache()
     u, s, vh = randomized_svd(dot, n_components=k_components, random_state=0)
     z = np.vstack([u, vh.T])  # gene x k_components
     z = z @ np.sqrt(np.diag(s))  # will reduce the MNN pairs number greatly

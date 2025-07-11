@@ -2,11 +2,6 @@ import scanpy as sc
 
 from decipher import DECIPHER, CFG
 
-
-CFG.omics.model.epochs = 6
-# CFG.omics.model.plot = True
-CFG.omics.loader.batch_size = 256
-
 # read in data
 adata = sc.read_h5ad("./data/merged_adata.h5ad")
 adata = adata[adata.obs['batch'] == '0'].copy()

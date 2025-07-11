@@ -34,7 +34,6 @@ def test_decipher_single_slice():
     global_seed(0)
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 2
-    CFG.omics.model.plot = True
     CFG.omics.loader.batch_size = 64
     CFG.omics.pretrain.force = True
     CFG.omics.pretrain.epochs = 2
@@ -46,7 +45,6 @@ def test_decipher_single_slice():
     model.register_data(adata)
 
     model.fit_omics()
-    model.visualize()
 
     adata.X = adata.layers["counts"].copy()
     model.train_gene_select(adata, cell_type="cell_type", min_cells=1, n_jobs=1)
@@ -66,7 +64,6 @@ def test_decipher_multi_slices():
     global_seed(0)
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 2
-    CFG.omics.model.plot = True
     CFG.omics.loader.batch_size = 64
     CFG.omics.pretrain.force = True
     CFG.omics.pretrain.epochs = 2
@@ -78,7 +75,6 @@ def test_decipher_multi_slices():
     model.register_data([adata_1, adata_2], group_list=["batch_1", "batch_2"])
 
     model.fit_omics()
-    model.visualize()
 
     adata.X = adata.layers["counts"].copy()
     model.train_gene_select(adata, cell_type="cell_type", min_cells=1, n_jobs=1)

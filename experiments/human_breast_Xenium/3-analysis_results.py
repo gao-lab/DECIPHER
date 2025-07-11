@@ -15,14 +15,14 @@
 
 # %%
 from decipher import DECIPHER
+from decipher.utils import gex_embedding, scanpy_viz
 import scanpy as sc
 
 # %%
 model = DECIPHER(work_dir='./results/decipher')
+adata = sc.read_h5ad('./data/adata.h5ad')
 
 # %%
-model.visualize()
-
 # %% [markdown]
 # ## Analysis results
 # ### T cells

@@ -5,9 +5,6 @@ from loguru import logger
 from decipher import DECIPHER, CFG
 
 # %%
-CFG.omics.model.augment.dropout_gex = 0.4
-CFG.omics.model.batch_size = 512
-# disable validation plot
 CFG.omics.model.max_steps = 20_000
 
 # %%

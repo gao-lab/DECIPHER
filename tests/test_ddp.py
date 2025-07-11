@@ -18,7 +18,6 @@ def manual_test_ddp():
 
     CFG.omics.model.augment.dropout_gex = 0.6
     CFG.omics.model.epochs = 2
-    CFG.omics.model.plot = True
     CFG.omics.loader.batch_size = 128
     CFG.omics.pretrain.epochs = 1
 

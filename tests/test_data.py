@@ -45,6 +45,6 @@ def test_findMNN():
 
 
 if __name__ == "__main__":
-    test_OmicsSpatialAugment()
-    test_ScAugment()
+    # test_OmicsSpatialAugment()
+    # test_ScAugment()
     test_findMNN()

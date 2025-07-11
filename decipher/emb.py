@@ -6,7 +6,6 @@ from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import torch
 from addict import Dict
 from loguru import logger
@@ -58,7 +57,6 @@ def spatial_emb(
     spatial_edge: Tensor,
     config: Dict,
     mnn_dataset: Dataset = None,
-    meta: pd.DataFrame = None,
     pretrained_model: ScSimCLR = None,
     batch: np.ndarray = None,
     DDP: bool = False,
@@ -76,8 +74,6 @@ def spatial_emb(
         model config
     mnn_dataset
         mnn dataset
-    meta
-        meta of cells
     pretrained_model
         pre-trained single cell model
     batch
@@ -99,9 +95,9 @@ def spatial_emb(
     datamodule = get_graph_datamodule(graph, config, mnn_dataset)
 
     if mnn_dataset is None:
-        model = OmicsSpatialSimCLR(config.model, meta)
+        model = OmicsSpatialSimCLR(config.model)
     else:
-        model = OmicsSpatialSimCLRMNN(config.model, meta)
+        model = OmicsSpatialSimCLRMNN(config.model)
 
     if pretrained_model is not None:
         model.center_encoder = deepcopy(pretrained_model.center_encoder)
@@ -121,7 +117,6 @@ def sc_emb(
     x: np.ndarray,
     config: Dict,
     mnn_dataset: Dataset = None,
-    meta: pd.DataFrame = None,
     batch: np.ndarray = None,
 ) -> tuple[ScSimCLR, np.ndarray | None]:
     r"""
@@ -135,8 +130,6 @@ def sc_emb(
         model config
     mnn_dataset:
         mnn dataset
-    meta:
-        meta of cells
     batch:
         batch index
 
@@ -152,7 +145,7 @@ def sc_emb(
     mnn_flag = True if mnn_dataset is not None else False
     if not config.pretrain.force:
         try:
-            return load_sc_model(config, mnn_flag, meta), None
+            return load_sc_model(config, mnn_flag), None
         except Exception as e:  # noqa
             logger.info(f"Not found pre-trained model: {e}")
 
@@ -166,9 +159,9 @@ def sc_emb(
     datamodule = LightningScMNNData(config.loader, train_dataset, val_dataset, mnn_dataset)
 
     if mnn_flag:
-        model = ScSimCLRMNN(meta, config.model)
+        model = ScSimCLRMNN(config.model)
     else:
-        model = ScSimCLR(meta, config.model)
+        model = ScSimCLR(config.model)
 
     if config.model.fix_sc:
         fit_and_inference(model, datamodule, config.model, show_name="single cell")
@@ -179,7 +172,7 @@ def sc_emb(
     return model, center_emb
 
 
-def load_sc_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
+def load_sc_model(config, mnn_flag: bool):
     r"""
     Load omics encoder model
 
@@ -189,14 +182,12 @@ def load_sc_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
         model config
     mnn_flag
         whether use mnn
-    meta
-        meta of cells
     """
     model_path = Path(config.model.work_dir) / "pretrain"
     # sort by modification time
     model_path = sorted(model_path.glob("*.ckpt"), key=os.path.getmtime)[-1]
     logger.info(f"Loading model from {model_path}")
-    kwargs = {"meta": meta, "config": config.model}
+    kwargs = {"config": config.model}
     if mnn_flag:
         sc_model = ScSimCLRMNN.load_from_checkpoint(model_path, **kwargs)
     else:
@@ -205,7 +196,7 @@ def load_sc_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
     return sc_model
 
 
-def load_spatial_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
+def load_spatial_model(config, mnn_flag: bool):
     r"""
     Load decipher spatial model
 
@@ -215,14 +206,12 @@ def load_spatial_model(config, mnn_flag: bool, meta: pd.DataFrame = None):
         model config
     mnn_flag
         whether use mnn
-    meta
-        meta of cells
     """
     model_path = Path(config.model.work_dir) / "model"
     model_path = sorted(model_path.glob("*.ckpt"), key=os.path.getmtime)[-1]
     logger.info(f"Loading model from {model_path}")
     config.model.device_num = 1
-    kwargs = {"config": config.model, "meta": meta}
+    kwargs = {"config": config.model}
     if mnn_flag:
         model = OmicsSpatialSimCLRMNN.load_from_checkpoint(model_path, **kwargs)
     else:

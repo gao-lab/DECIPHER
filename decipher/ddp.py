@@ -41,6 +41,7 @@ class DDPMixin:
             logger.warning("Using DDP with < 500k cells is not recommended.")
 
         max_gpus = torch.cuda.device_count()
+        assert max_gpus > 1, "DDP requires at least 2 GPUs."
         gpus = min(gpus, max_gpus) if gpus > 0 else max_gpus
 
         if ddp_pretrain:

@@ -6,13 +6,7 @@ import numpy as np
 from annoy import AnnoyIndex
 from loguru import logger
 
-try:
-    from cuml.neighbors import NearestNeighbors as cuNearestNeighbors
-
-    CUML_FLAG = True
-except ImportError:
-    CUML_FLAG = False
-    logger.warning("cuML is not available.")
+from ..utils import RSC_FLAG
 
 
 def knn(
@@ -52,7 +46,7 @@ def knn(
     if method == "auto":
         method = ["cuml", "faiss", "annoy"]
     method = method if isinstance(method, list) else [method]
-    if not CUML_FLAG and "cuml" in method:
+    if not RSC_FLAG and "cuml" in method:
         method.remove("cuml")
     if not approx and "annoy" in method:
         method.remove("annoy")
@@ -123,6 +117,8 @@ def knn_cuml(
     r"""
     Build k-NN graph by cuML
     """
+    from cuml.neighbors import NearestNeighbors as cuNearestNeighbors
+
     model = cuNearestNeighbors(n_neighbors=k, metric=metric)
     model.fit(ref)
     distances, indices = model.kneighbors(query)

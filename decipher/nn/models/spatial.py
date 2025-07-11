@@ -1,31 +1,24 @@
 r"""
-Spatial omics model
+Spatial omics contrastive learning model
 """
-import pandas as pd
 from addict import Dict
 from torch import Tensor
 from torch_geometric.data import Data
 
 from ...data.augment import OmicsSpatialAugment
 from ..loss import NTXentLoss
-from ._basic import _NeighborEmbedding
-from ._omics_mixin import OmicsMixin
+from ._basic import NeighborEmbeddingModel
 
 
-class OmicsSpatialSimCLR(_NeighborEmbedding, OmicsMixin):
+class OmicsSpatialSimCLR(NeighborEmbeddingModel):
     r"""
     SimCLR framework for spatial omics data
     """
 
-    def __init__(
-        self,
-        config: Dict,
-        meta: pd.DataFrame = None,
-    ) -> None:
+    def __init__(self, config: Dict) -> None:
         super().__init__(config)
         self.center_criterion = NTXentLoss(config.temperature_center)
         self.nbr_criterion = NTXentLoss(config.temperature_nbr)
-        self.register_omics(meta, config)
         self.augment = OmicsSpatialAugment(config.augment)
         self._reset_prams()
 
@@ -59,6 +52,16 @@ class OmicsSpatialSimCLR(_NeighborEmbedding, OmicsMixin):
         )
         return loss
 
+    def test_step(self, data: Data, batch_idx: int) -> None:
+        xs_raw, order = self.augment(data, train=False)
+        z_center, z = self.center_forward(xs_raw)
+        mask = self.create_attn_mask(xs_raw)
+        z_nbr = self.nbr_forward(z, mask)
+        z_nbr = self.projection_head(z_nbr)
+        self.val_z_center_list.append(z_center)
+        self.val_z_nbr_list.append(z_nbr)
+        self.val_z_order_list.append(order)
+
 
 class OmicsSpatialSimCLRMNN(OmicsSpatialSimCLR):
     r"""
@@ -66,18 +69,12 @@ class OmicsSpatialSimCLRMNN(OmicsSpatialSimCLR):
 
     Parameters
     ----------
-    meta:
-        metadata
     config:
-        model configuration
+        model configuration dict
     """
 
-    def __init__(
-        self,
-        config: Dict,
-        meta: pd.DataFrame = None,
-    ) -> None:
-        super().__init__(config, meta)
+    def __init__(self, config: Dict) -> None:
+        super().__init__(config)
         self.batched = True
 
     def training_step(self, data: dict, batch_idx: int) -> Tensor:

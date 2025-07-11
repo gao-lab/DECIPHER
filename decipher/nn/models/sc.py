@@ -1,31 +1,26 @@
 r"""
-Single cell model
+Single cell contrastive learning model
 """
-import pandas as pd
 from addict import Dict
 from torch import Tensor
 
 from ...data.augment import ScAugment
 from ..loss import NTXentLoss
-from ._basic import _Embedding
-from ._omics_mixin import OmicsMixin
+from ._basic import EmbeddingModel
 
 
-class ScSimCLR(_Embedding, OmicsMixin):
+class ScSimCLR(EmbeddingModel):
     r"""
     Single cell embedding
 
     Parameters
     ----------
-    meta:
-        metadata
     config:
         model configuration
     """
 
-    def __init__(self, meta: pd.DataFrame, config: Dict) -> None:
+    def __init__(self, config: Dict) -> None:
         super().__init__(config)
-        self.register_omics(meta, config)
         self.augment = ScAugment(config.augment)
         self.criterion = NTXentLoss(config.temperature_center)
         self._reset_prams()
@@ -38,19 +33,11 @@ class ScSimCLR(_Embedding, OmicsMixin):
         self.log("train/total_loss", loss, prog_bar=True)
         return loss
 
-    def validation_step(self, data: list[Tensor], batch_idx: int) -> None:
+    def test_step(self, data: list[Tensor], batch_idx: int) -> None:
         x, order = data
         z = self.center_encoder(x)
         self.val_z_center_list.append(z)
         self.val_z_order_list.append(order)
-
-    def on_validation_epoch_end(self) -> None:
-        if len(self.val_z_center_list) == 0:
-            return
-        z_center, _ = self.gather_output()
-        if self.trainer.is_global_zero:  # main GPU in DDP
-            if not self.trainer.sanity_checking:
-                self.save_embedding(z_center, name="sc")
 
 
 class ScSimCLRMNN(ScSimCLR):
@@ -59,14 +46,12 @@ class ScSimCLRMNN(ScSimCLR):
 
     Parameters
     ----------
-    meta:
-        metadata
     config:
         model configuration
     """
 
-    def __init__(self, meta: pd.DataFrame, config: Dict) -> None:
-        super().__init__(meta, config)
+    def __init__(self, config: Dict) -> None:
+        super().__init__(config)
 
     def training_step(self, batch: list[Tensor] | dict, batch_idx: int) -> Tensor:
         if isinstance(batch, dict):  # with extra data

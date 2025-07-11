@@ -32,12 +32,43 @@ import scanpy as sc
 import rapids_singlecell as rsc
 import squidpy as sq
 import numpy as np
+import matplotlib.pyplot as plt
+
 import decipher
 from decipher.utils import scanpy_viz, clip_umap, manage_gpu, gex_embedding
-from decipher.plot import split_umap
 
 # reload scanpy_viz function
 reload(decipher.utils)
+
+# %%
+def split_umap(adata, split_by, ncol=1, nrow=None, **kwargs):
+    r"""
+    Split umap by split_by like Seurat
+
+    Parameters
+    ----------
+    adata
+        AnnData object
+    split_by
+        split by variable
+    ncol
+        number of columns
+    nrow
+        number of rows
+    **kwargs
+        other parameters for `sc.pl.umap`
+    """
+    categories = adata.obs[split_by].cat.categories
+    # print(categories)
+    if nrow is None:
+        nrow = int(np.ceil(len(categories) / ncol))
+    fig, axs = plt.subplots(nrow, ncol, figsize=(5 * ncol, 4 * nrow))
+    axs = axs.flatten()
+    for i, cat in enumerate(categories):
+        ax = axs[i]
+        sc.pl.umap(adata[adata.obs[split_by] == cat], ax=ax, show=False, title=cat, **kwargs)
+    plt.tight_layout()
+
 
 # %%
 adata_path = "./data/pancancer_filter_anno.h5ad"

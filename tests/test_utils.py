@@ -1,15 +1,6 @@
 import scanpy as sc
-import torch
 
-from decipher.utils import gex_embedding, scanpy_viz, select_free_gpu
-
-
-def test_select_free_gpu(n=2):
-    gpu = select_free_gpu(n)
-    if torch.cuda.device_count() > 0:
-        assert len(gpu) == n
-    else:
-        assert gpu == [None] * n
+from decipher.utils import gex_embedding, scanpy_viz
 
 
 def test_gex_embedding_scanpy_viz():

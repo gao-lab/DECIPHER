@@ -1,40 +1,35 @@
 r"""
-Basic classes for contrastive learning embedding
+Basic classes for embedding
 """
-
-from pathlib import Path
+from abc import ABC
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from addict import Dict
-from anndata import AnnData
 from loguru import logger
 from pytorch_lightning import LightningModule
 from pytorch_lightning.strategies import DDPStrategy
 from torch import Tensor, nn
-from torch_geometric.data import Data
 from torch_geometric.nn import MLP
 
-from ...utils import RSC_FLAG, save_dict
 from ..layers.attn_pooling_layer import AttentionPooling
 from ..layers.transformer_layer import ViT1D
 from ..scheduler import CosineAnnealingWarmupRestarts
 
 
-class _Embedding(LightningModule):
+class EmbeddingModel(LightningModule, ABC):
     r"""
-    Basic class for contrastive learning embedding
+    Basic class embedding
     """
 
     def __init__(self, config: Dict) -> None:
         super().__init__()
         self.config = config
-        self.work_dir = Path(config.work_dir)
-        self.val_z_center_list = []
-        self.val_z_nbr_list = []
-        self.val_z_order_list = []  # order for multi-gpu inference
+        self.batched = False
+        self.center_encoder = MLP(config.gex_dims, dropout=config.dropout)
         logger.debug(config.to_dict())
+        self.save_hyperparameters(config.to_dict())
 
     def _reset_prams(self) -> None:
         r"""
@@ -72,46 +67,6 @@ class _Embedding(LightningModule):
             }
         ]
 
-    def custom_histogram_weights(self):
-        r"""
-        log weights in tensorboard
-        """
-        for name, params in self.named_parameters():
-            try:
-                self.logger.experiment.add_histogram(name, params, self.current_epoch)
-            except:  # noqa
-                logger.error(f"Failed to log {name}: {params} to tensorboard")
-
-    def on_train_epoch_end(self):
-        if self.config.plot_hist:
-            self.custom_histogram_weights()
-        if self.current_epoch == 0:
-            self.version_dir = (
-                self.work_dir
-                / self.config.model_dir
-                / "lightning_logs"
-                / f"version_{self.logger.version}"
-            )
-            save_dict(self.config.to_dict(), self.version_dir / "hyperparams.yaml")
-
-    def on_fit_end(self) -> None:
-        if RSC_FLAG:
-            import rmm
-
-            rmm.reinitialize(pool_allocator=True)  # aviod memory leak
-        if self.trainer.is_global_zero:
-            if self.config.save_h5ad and isinstance(self.adata, AnnData):
-                h5ad_file = self.version_dir / "adata.h5ad"
-                logger.info(f"Saving the H5AD file to {h5ad_file}...")
-                try:
-                    self.adata.write_h5ad(h5ad_file)
-                    self.h5ad_file = h5ad_file
-                except Exception as e:  # noqa
-                    logger.error(f"Failed to save the H5AD file: {e}")
-
-    def test_step(self, data: Data, batch_idx: int) -> None:
-        self.validation_step(data, batch_idx)
-
     def on_exception(self, exception: Exception) -> None:
         logger.error(f"Training failed: {exception}")
 
@@ -146,8 +101,13 @@ class _Embedding(LightningModule):
         self.val_z_order_list = []
         return z_center, z_nbr
 
+    def on_test_start(self):
+        self.val_z_center_list = []
+        self.val_z_nbr_list = []
+        self.val_z_order_list = []  # order for multi-gpu inference
 
-class _NeighborEmbedding(_Embedding):
+
+class NeighborEmbeddingModel(EmbeddingModel, ABC):
     r"""
     Transformer-based neighbor embedding model
     """
@@ -196,7 +156,6 @@ class _NeighborEmbedding(_Embedding):
         r"""
         Neighbor forward
         """
-        # TODO: mask center node ?
         cls_emb, cell_emb = self.nbr_encoder(z[:, 1:, :], key_padding_mask=mask[:, 1:])
         if self.config.spatial_emb == "cls":
             return cls_emb
@@ -211,22 +170,3 @@ class _NeighborEmbedding(_Embedding):
             return cell_emb.mean(dim=1)
         else:
             raise ValueError(f"Unknown spatial embedding type: {self.config.spatial_emb}")
-
-    def validation_step(self, data: Data, batch_idx: int) -> None:
-        xs_raw, order = self.augment(data, train=False)
-        z_center, z = self.center_forward(xs_raw)
-        mask = self.create_attn_mask(xs_raw)
-        z_nbr = self.nbr_forward(z, mask)
-        z_nbr = self.projection_head(z_nbr)
-        self.val_z_center_list.append(z_center)
-        self.val_z_nbr_list.append(z_nbr)
-        self.val_z_order_list.append(order)
-
-    def on_validation_epoch_end(self) -> tuple[Tensor, Tensor]:
-        if len(self.val_z_center_list) == 0:
-            return
-        z_center, z_nbr = self.gather_output()
-        if self.trainer.is_global_zero:
-            if not self.trainer.sanity_checking:  # avoid test in first epoch
-                self.save_embedding(z_center, name="gex")
-                self.save_embedding(z_nbr, name="nbr")

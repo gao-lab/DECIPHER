@@ -37,7 +37,7 @@ install_pyg_dependencies
 (Optional) You can install [RAPIDS](https://docs.rapids.ai/install) to accelerate visualization.
 
 ```sh
-mamba create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=24.12 'cuda-version>=12.0,<=12.2' -y && conda activate decipher
+mamba create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=25.06 'cuda-version>=12.0,<=12.8' -y && conda activate decipher
 pip install cell-decipher
 install_pyg_dependencies
 ```

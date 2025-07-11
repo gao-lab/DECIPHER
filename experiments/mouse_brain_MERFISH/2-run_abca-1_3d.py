@@ -8,7 +8,6 @@ CFG.omics.model.epochs = 2
 CFG.omics.model.augment.dropout_gex = 0.4
 CFG.omics.loader.batch_size = 512
 # disable validation plot
-CFG.omics.model.plot = False
 CFG.omics.ignore_batch = True
 
 

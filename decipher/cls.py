@@ -8,10 +8,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import scanpy as sc
 import scipy.sparse as sps
 import torch
-import torch.nn.functional as F
 import yaml
 from addict import Dict
 from anndata import AnnData
@@ -26,8 +24,7 @@ from .emb import sc_emb, spatial_emb
 from .explain.gene.mixin import GeneSelectMixin
 from .explain.regress.mixin import RegressMixin
 from .graphic.build import build_graph
-from .plot import plot_sc
-from .utils import CFG, estimate_spot_size, global_seed, scanpy_viz, sync_config
+from .utils import CFG, global_seed, l2norm, sync_config
 
 
 class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
@@ -157,59 +154,23 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
             mnn_dataset = MNNDataset(self.x, self.valid_cellidx, self.mnn_dict)
             logger.info(f"Using MNN with {len(np.unique(self.batch))} batches.")
         # train model
-        sc_model, center_emb_pretrain = sc_emb(
-            self.x, self.cfg.omics, mnn_dataset, self.meta, self.batch
-        )
+        sc_model, center_emb_pretrain = sc_emb(self.x, self.cfg.omics, mnn_dataset, self.batch)
         center_emb, self.nbr_emb = spatial_emb(
             self.x,
             self.edge_index,
             self.cfg.omics,
             mnn_dataset,
-            self.meta,
             sc_model,
             self.batch,
         )
         self.center_emb = center_emb_pretrain if center_emb_pretrain else center_emb
-        # as float
-        self.center_emb = self.center_emb.astype(np.float32)
-        self.nbr_emb = self.nbr_emb.astype(np.float32)
+        # norm
+        self.center_emb = l2norm(self.center_emb.astype(np.float32))
+        self.nbr_emb = l2norm(self.nbr_emb.astype(np.float32))
         # save embeddings
         np.save(self.work_dir / "center_emb.npy", self.center_emb)
         np.save(self.work_dir / "nbr_emb.npy", self.nbr_emb)
         logger.info(f"Results saved to {self.work_dir}")
-
-    def visualize(self, resolution: float = 0.5) -> None:
-        r"""
-        Visualize results, should run after `fit_omics`
-
-        Parameters
-        ----------
-        resolution
-            resolution for clustering
-        """
-        if (self.work_dir / "embedding.h5ad").exists():
-            adata = sc.read_h5ad(self.work_dir / "embedding.h5ad")
-        else:
-            norm_center = F.normalize(torch.tensor(self.center_emb)).numpy()
-            norm_nbr = F.normalize(torch.tensor(self.nbr_emb)).numpy()
-            adata = sc.AnnData(
-                X=np.zeros((self.center_emb.shape[0], 1)),
-                obsm={
-                    "X_center": self.center_emb,
-                    "X_nbr": self.nbr_emb,
-                    "X_merge": np.hstack([norm_center, norm_nbr]),
-                    "spatial": self.coords,
-                },
-                obs=self.meta.astype(str),
-            )
-            adata.uns["spot_size"] = estimate_spot_size(adata.obsm["spatial"])
-            adata = scanpy_viz(adata, resolution=resolution)
-            adata.write_h5ad(self.work_dir / "embedding.h5ad")
-        color_vars = ["leiden_center", "leiden_nbr"]
-        for var in ["_celltype", "_batch"]:
-            if var in adata.obs.columns:
-                color_vars.append(var)
-        plot_sc(adata, color_vars)
 
     def load(self, from_dir: str | Path = None) -> None:
         r"""
