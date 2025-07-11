@@ -26,7 +26,7 @@ import time
 import scanpy as sc
 import numpy as np
 
-from spider.utils import scanpy_viz
+from DECIPHER.utils import scanpy_viz
 
 # %%
 adata2 = sc.read_h5ad("./results/adata_analysis.h5ad")
@@ -93,11 +93,11 @@ adata.obs['Tissue_1'].value_counts()
 
 # %%
 from importlib import reload
-import spider
-reload(spider.utils)
+import DECIPHER
+reload(DECIPHER.utils)
 
 # %%
-from spider.utils import gex_embedding
+from DECIPHER.utils import gex_embedding
 
 # %%
 # del adata.layers

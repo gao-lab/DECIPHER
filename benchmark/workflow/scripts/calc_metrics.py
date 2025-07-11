@@ -29,7 +29,7 @@ from decipher.utils import scanpy_viz, estimate_spot_size
 
 import ray
 
-sc._settings.ScanpyConfig.n_jobs = 1
+sc._settings.settings.n_jobs = 1
 # %% tags=["parameters"]
 # parameter tag
 center_emb = "./center_emb.npy"

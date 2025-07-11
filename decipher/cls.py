@@ -16,6 +16,7 @@ import yaml
 from addict import Dict
 from anndata import AnnData
 from loguru import logger
+from scanpy._settings import settings as sc_settings
 from sklearn.preprocessing import LabelEncoder
 
 from .data.mnn_dataset import MNNDataset, MNNMixin
@@ -66,7 +67,7 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
             self.load(work_dir)
             logger.success("Recover from previous run.")
         global_seed(self.cfg.seed)
-        sc._settings.ScanpyConfig.figdir = self.work_dir / "figures"
+        sc_settings.figdir = self.work_dir / "figures"
 
     def register_data(
         self,
