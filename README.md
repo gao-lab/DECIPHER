@@ -17,6 +17,8 @@
 
 `DECIPHER` aims to learn cells’ disentangled intracellular molecular identity embedding and extracellular spatial context embedding from spatial omics data.
 
+Please check our paper *DECIPHER for learning disentangled cellular embeddings in large-scale heterogeneous spatial omics data* on [Nature Communications](https://www.nature.com/articles/s41467-025-63140-8).
+
 ![DECIPHER](./docs/_static/Model.png)
 
 ## Installation
@@ -96,7 +98,7 @@ sc.pl.umap(adata, color=['region'])
 
 ## Citation
 
-*High-fidelity disentangled cellular embeddings for large-scale heterogeneous spatial omics via DECIPHER* ([biorxiv](https://www.biorxiv.org/content/10.1101/2024.11.29.626126v1) 2024)
+*DECIPHER for learning disentangled cellular embeddings in large-scale heterogeneous spatial omics data* ([Nature Communications](https://www.nature.com/articles/s41467-025-63140-8))
 
 
 > If you want to repeat our benchmarks and case studies, please check the [**benchmark**](./benchmark/) and [**experiments**](./experiments/) folder.
