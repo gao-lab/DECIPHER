@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/rapidsai/base:24.04-cuda11.8-py3.11
+FROM pytorch/pytorch:2.8.0-cuda12.6-cudnn9-runtime
 
 # Update and install dependencies
 USER root
@@ -13,4 +13,4 @@ WORKDIR /app
 COPY ./decipher ./decipher
 COPY ./README.md ./README.md
 COPY ./pyproject.toml ./pyproject.toml
-RUN pip --no-cache-dir install -e "." && install_pyg_dependencies && rm -rf /tmp/*
+RUN pip --no-cache-dir install -e "." && rm -rf /tmp/* && pip cache purge && install_pyg_dependencies && rm -rf /tmp/* && pip cache purge

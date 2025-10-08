@@ -111,7 +111,11 @@ class GeneSelectMixin:
             lr.to_csv(work_dir / "lr.csv")
         else:
             cfg.expr_dim = adata.n_vars
-            expr = torch.from_numpy(adata.X.A) if issparse(adata.X) else torch.from_numpy(adata.X)
+            expr = (
+                torch.from_numpy(adata.X.toarray())
+                if issparse(adata.X)
+                else torch.from_numpy(adata.X)
+            )
         nbr_emb = torch.from_numpy(self.nbr_emb)
         center_emb = torch.from_numpy(self.center_emb)
         assert expr.shape[0] == nbr_emb.shape[0] == center_emb.shape[0], "Data shape not match."

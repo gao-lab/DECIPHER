@@ -190,10 +190,10 @@ class DECIPHER(RegressMixin, GeneSelectMixin, MNNMixin, DDPMixin):
         self.edge_index = torch.from_numpy(np.load(self.work_dir / "edge_index.npy"))
         self.x = np.load(self.work_dir / "x.npy").astype(np.float32)
         self.meta = pd.read_csv(self.work_dir / "cell_meta.csv")
-        self.batch = torch.load(self.work_dir / "batch.pt")
+        self.batch = torch.load(self.work_dir / "batch.pt", weights_only=False)
         if self.batch is not None and not self.cfg.omics.ignore_batch:
             self.valid_cellidx = np.load(self.work_dir / "valid_cellidx.npy")
-            self.mnn_dict = torch.load(self.work_dir / "mnn_dict.pt")
+            self.mnn_dict = torch.load(self.work_dir / "mnn_dict.pt", weights_only=False)
         for var in ["center_emb", "nbr_emb"]:
             if (self.work_dir / f"{var}.npy").exists():
                 setattr(self, var, np.load(self.work_dir / f"{var}.npy").astype(np.float32))

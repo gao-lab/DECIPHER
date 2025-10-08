@@ -16,7 +16,7 @@ model = DECIPHER(work_dir="./results/decipher_abca-1_3d_0705", user_cfg=CFG)
 # read in data
 adata = sc.read_h5ad("./data/zhuang_dataset/abca_processed.h5ad")
 adata = adata[adata.obs["feature_matrix_label"].isin(["Zhuang-ABCA-1"])].copy()
-edge_index = torch.load('./results/abca-1_3d_edge_index.pt').long()
+edge_index = torch.load('./results/abca-1_3d_edge_index.pt', weights_only=False).long()
 model.register_data(adata, cell_type='class', preprocess=False, edge_index=edge_index)
 
 model.fit_omics()

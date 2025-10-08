@@ -26,7 +26,7 @@ Please check our paper *DECIPHER for learning disentangled cellular embeddings i
 ### PyPI
 
 > [!IMPORTANT]
-> Requires Python >= 3.10 and CUDA-enabled GPU (CPU-only device is not recommended).
+> Requires Python >= 3.10, install with CUDA-enabled GPU is recommended.
 
 We recommend to install `cell-decipher` to a new conda environment:
 
@@ -92,7 +92,7 @@ sc.pl.umap(adata, color=['region'])
 | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [Basic Model Tutorial](./docs/tutorials/1-train_model.ipynb)                | Tutorial on how to use DECIPHER                            | [![Open In Colab](https://img.shields.io/badge/Colab-PyTorch-blue?logo=googlecolab)](https://colab.research.google.com/drive/14PEtrgqlf-KbLOTfBLc9gbx0YvY6mi0S?usp=sharing) |
 | [Multi-slices with Batch Effects](./docs/tutorials/2-remove_batch.ipynb)     | Tutorial on how to apply DECIPHER to multiple slices with batch effects | [![Open In Colab](https://img.shields.io/badge/Colab-PyTorch-blue?logo=googlecolab)](https://colab.research.google.com/drive/1eLJeRDZFq2tlDUWpETlSxVUdzRv9CeSD?usp=sharing) |
-| [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) | Tutorial on how to identify ligand-receptors which related wtih cells’ localization based on DECIPHER embeddings | Insufficient resources |
+| [Identify Localization-related LRs](./docs/tutorials/3-select_LRs.ipynb) | Tutorial on how to identify ligand-receptors which related with cells’ localization based on DECIPHER embeddings | Insufficient resources |
 | [Multi-GPUs Training](./docs/tutorials.md#multi-gpu-training)                        | Tutorial on how to use DECIPHER with multi-GPUs on spatial atlas | Insufficient resources |
 | [More technologies](./docs/tutorials/4-more_techs.ipynb)                        | Tutorial on how to use DECIPHER with multiple spatial technologies | Insufficient resources |
 
