@@ -1,7 +1,6 @@
 import torch
 from einops import repeat
 from torch import Tensor, nn
-from torch_geometric.typing import OptTensor
 
 
 class TransformerLayer(nn.Module):
@@ -35,8 +34,8 @@ class TransformerLayer(nn.Module):
     def forward(
         self,
         x: Tensor,
-        key_padding_mask: OptTensor,
-        attn_mask: OptTensor,
+        key_padding_mask: Tensor | None,
+        attn_mask: Tensor | None,
     ) -> Tensor:
         attn_out = self.attn(x, x, x, key_padding_mask=key_padding_mask, attn_mask=attn_mask)[0]
         x = x + self.dropout(attn_out)
@@ -72,8 +71,8 @@ class Transformer(nn.Module):
     def forward(
         self,
         x: Tensor,
-        key_padding_mask: OptTensor = None,
-        attn_mask: OptTensor = None,
+        key_padding_mask: Tensor | None = None,
+        attn_mask: Tensor | None = None,
     ) -> Tensor:
         for layer in self.layers:
             x = layer(x, key_padding_mask, attn_mask)
@@ -116,8 +115,8 @@ class ViT1D(nn.Module):
     def forward(
         self,
         x: Tensor,
-        key_padding_mask: OptTensor = None,
-        attn_mask: OptTensor = None,
+        key_padding_mask: Tensor | None = None,
+        attn_mask: Tensor | None = None,
     ) -> tuple[Tensor, Tensor]:
         b = x.shape[0]  # batch size
 
@@ -134,3 +133,37 @@ class ViT1D(nn.Module):
         x = self.transformer(x, key_padding_mask, attn_mask)
         cls_tokens, emb = x[:, 0], x[:, 1:]
         return cls_tokens, emb
+
+
+class AttentionPooling(nn.Module):
+    r"""
+    Attention pooling network with sigmoid gating (3 fc layers)
+
+    Args:
+        L (int): input feature dimension
+        D (int): hidden layer dimension
+        dropout (bool): whether to apply dropout (p = 0.25)
+        n_classes (int): number of classes
+    """
+
+    def __init__(
+        self, L: int = 1024, D: int = 256, dropout: float = 0.0, n_classes: int = 1
+    ) -> None:
+        super().__init__()
+        self.attention_a = [nn.Linear(L, D), nn.Tanh()]
+        self.attention_b = [nn.Linear(L, D), nn.Sigmoid()]
+
+        if dropout > 0.0:
+            self.attention_a.append(nn.Dropout(dropout))
+            self.attention_b.append(nn.Dropout(dropout))
+
+        self.attention_a = nn.Sequential(*self.attention_a)
+        self.attention_b = nn.Sequential(*self.attention_b)
+        self.attention_c = nn.Linear(D, n_classes)
+
+    def forward(self, x: Tensor) -> Tensor:
+        a = self.attention_a(x)
+        b = self.attention_b(x)
+        A = a * b
+        A = self.attention_c(A)  # N x n_classes
+        return A

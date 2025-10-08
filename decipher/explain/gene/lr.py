@@ -9,7 +9,6 @@ from loguru import logger
 from scipy.sparse import isspmatrix
 from torch_geometric.nn import SimpleConv
 
-from ...data.process import _filter_gene
 from ...graphic.build import build_graph
 
 
@@ -25,29 +24,17 @@ def get_lr_expr(
 
     We multiply mean ligand expression in given radius and receptor expression in the cell as the activity of a ligand-receptor pair.
 
-    Parameters
-    ----------
-    adata
-        AnnData object
-    lr
-        Ligand receptor pairs, must contain columns `ligand.symbol` and `receptor.symbol`
-    radius
-        radius for valid ligand
-    aggr
-        aggregation method of ligand expression, default is `mean`
-    binary
-        if convert the expression to binary, default is `False`
-
-    Returns
-    ----------
-    LR activity
-        Ligand-receptor pair activity
-    lr
-        filtered ligand receptor pairs
-
-    Note
-    ----------
-    Not support batched data yet.
+    Args:
+        adata: AnnData object
+        lr: Ligand receptor pairs, must contain columns `ligand.symbol` and `receptor.symbol`
+        radius: float radius for valid ligand
+        aggr: str aggregation method of ligand expression, default is `mean`
+        binary: bool if convert the expression to binary, default is `False`
+    Returns:
+        LR activity: Ligand-receptor pair activity
+        lr: filtered ligand receptor pairs
+    Note:
+        Not support batched data yet.
     """
     # check
     assert "ligand.symbol" in lr.columns
@@ -70,9 +57,6 @@ def get_lr_expr(
     lr_genes = list(set(lr_genes))
     lr_idx = [x in lr_genes for x in adata.var.index]
     adata = adata[:, lr_idx]
-    gene_idx = np.arange(adata.n_vars)
-    gene_idx = _filter_gene(adata.X.toarray(), gene_idx)
-    adata = adata[:, gene_idx].copy()
     sc.pp.filter_genes(adata, min_cells=30)
     logger.info(f"Find {adata.n_vars} LR-related genes.")
 

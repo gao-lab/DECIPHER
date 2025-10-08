@@ -42,9 +42,6 @@ def test_regress_mimic():
     train_regress(x, y, REGRESS_CFG, save_dir="test_regress")
 
 
-# NOTE: the test of LR is included in test_cls.py
-
-
 if __name__ == "__main__":
     test_GAE_mimic()
     test_regress_mimic()

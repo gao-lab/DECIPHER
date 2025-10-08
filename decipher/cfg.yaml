@@ -1,0 +1,126 @@
+seed: 0
+work_dir: results/DECIPHER
+
+pp:
+  ignore_batch: False
+  hvg: 2000
+  min_genes: 3
+  min_cells: 3
+
+graph:
+  k: 20
+  mode: knn
+  max_num_neighbors: 30
+
+mnn:
+  k_anchor: 5
+  k_components: 50
+  ref_based: True
+
+augment:
+  dropout_gex: 0.5
+  dropout_nbr_prob: 0
+  max_neighbor: 20
+
+sc_model:
+  model:
+    gex_dims: [-1, 256, 32]
+    dropout: 0.1
+    temperature_center: 0.07
+    lr: 0.001
+    weight_decay: 0.00001
+    lr_scheduler: false
+    num_training_steps: 99999
+    warmup_steps: 1000
+  loader:
+    batch_size: 256
+    num_workers: 4
+    pin_memory: true
+    persistent_workers: true
+  trainer:
+    have_val: false
+    model_dir: results/DECIPHER/sc_model
+    epochs: 5
+    device: auto
+    select_gpu: true
+    device_num: 1
+    fp16: true
+    patient: 10
+    log_every_n_steps: 10
+    gradient_clip_val: 5.0
+    check_val_every_n_epoch: 1
+    max_steps: 10000
+    detect_anomaly: false
+    num_sanity_val_steps: 0
+
+sp_model:
+  model:
+    fix_sc: false
+    spatial_emb: attn
+    transformer_layers: 3
+    emb_dim: 32
+    gex_dims: [-1, 256, 32]
+    prj_dims: [32, 32, 32]
+    num_heads: 1
+    dropout: 0.1
+    temperature_center: 0.07
+    temperature_nbr: 0.07
+    nbr_loss_weight: 0.5
+    lr: 0.0001
+    weight_decay: 0.00001
+    lr_scheduler: false
+    num_training_steps: 99999
+    warmup_steps: 1000
+  loader:
+    batch_size: 256
+    num_workers: 4
+    pin_memory: true
+    persistent_workers: true
+  num_neighbors: [-1]
+  trainer:
+    have_val: false
+    model_dir: results/DECIPHER/sp_model
+    epochs: 5
+    device: auto
+    select_gpu: true
+    device_num: 1
+    fp16: true
+    patient: 10
+    log_every_n_steps: 10
+    gradient_clip_val: 5.0
+    check_val_every_n_epoch: 1
+    max_steps: 10000
+    detect_anomaly: false
+    num_sanity_val_steps: 0
+
+regress:
+  select_gpu: false
+  lr: 0.001
+  shuffle: false
+  hidden_dim: 64
+  val_ratio: 0.1
+  test_ratio: 0.3
+  trainer:
+    have_val: false
+    epochs: 50
+    device: auto
+    select_gpu: true
+    device_num: 1
+    fp16: true
+    patient: 10
+    log_every_n_steps: 10
+    gradient_clip_val: 5.0
+    check_val_every_n_epoch: 1
+    max_steps: 10000
+    detect_anomaly: false
+    num_sanity_val_steps: 0
+
+gene_select:
+  k: 30
+  lr: 0.001
+  l1_weight: 1.0
+  gae_epochs: 300
+  test_ratio: 0.3
+  gumbel_threshold: 0.5
+  num_neighbors: [-1]
+  select_gpu: false

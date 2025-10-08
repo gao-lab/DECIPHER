@@ -2,21 +2,19 @@ r"""
 Mixin for select genes
 """
 import time
-from copy import deepcopy
 
 import pandas as pd
 import ray
 import scanpy as sc
 import torch
 import yaml
-from addict import Dict
 from loguru import logger
 from scanpy._utils import check_nonnegative_integers
 from scipy.sparse import issparse
 from torch_geometric.data import Batch, Data
 
+from ... import CFG
 from ...graphic.build import build_graph
-from ...utils import GENESELECT_CFG
 from .gene_selection import ray_train_GAE, train_GAE
 from .lr import get_lr_expr
 
@@ -40,7 +38,6 @@ class GeneSelectMixin:
         check_data: bool = True,
         normalize: bool = True,
         min_cells: int = 1000,
-        user_cfg: Dict = {},
         disable_gpu: bool = False,
         n_jobs: int = -1,
     ):
@@ -71,8 +68,6 @@ class GeneSelectMixin:
             If normalize adata.X
         min_cells
             Minimum cells for each cell type
-        user_cfg
-            User config for explain model
         disable_gpu
             If disable GPU (only when GPU memory is not enough)
         n_jobs
@@ -81,15 +76,14 @@ class GeneSelectMixin:
         start_time = time.time()
         assert hasattr(self, "nbr_emb"), "Lack self.nbr_emb, Please run `fit_omics()` first."
         # set config
-        cfg = deepcopy(GENESELECT_CFG)
+        cfg = CFG.gene_select
         work_dir = self.work_dir / sub_dir
         work_dir.mkdir(exist_ok=True, parents=True)
-        cfg.update(user_cfg)
         cfg.center_dim = self.center_emb.shape[1]
         cfg.nbr_dim = self.nbr_emb.shape[1]
         cfg.work_dir = str(work_dir)
         with open(work_dir / "gene_select_config.yaml", "w") as f:
-            yaml.dump(cfg.to_dict(), f)
+            yaml.dump(cfg, f)
         logger.debug(f"Gene select config: {cfg}")
 
         # prepare data

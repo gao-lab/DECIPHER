@@ -15,19 +15,18 @@ def test_ddp():
 
     work_dir = "./results/decipher_ddp"
     adata = sc.datasets.visium_sge("V1_Breast_Cancer_Block_A_Section_1")
+    adata = adata[:400, :500].copy()
 
-    CFG.omics.model.augment.dropout_gex = 0.6
-    CFG.omics.model.epochs = 2
-    CFG.omics.loader.batch_size = 128
-    CFG.omics.pretrain.epochs = 1
+    CFG.sp_model.model.epochs = 2
+    CFG.sc_model.model.epochs = 2
 
-    model = DECIPHER(work_dir, CFG)
+    model = DECIPHER(work_dir, overwrite=True)
     model.register_data(adata)
     model.fit_ddp(gpus=2)
 
     # test model recovery
     model_recover = DECIPHER(work_dir, recover=True)
-    model_recover.fit_ddp(gpus=3)
+    model_recover.fit_ddp(gpus=2)
 
 
 if __name__ == "__main__":

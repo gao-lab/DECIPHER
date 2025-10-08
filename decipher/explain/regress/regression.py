@@ -6,15 +6,46 @@ from pathlib import Path
 import pandas as pd
 import ray
 import torch
-from addict import Dict
-from pytorch_lightning import LightningModule
+from omegaconf import OmegaConf
+from pytorch_lightning import LightningDataModule, LightningModule
+from rui_utils.torch.trainer import fit_and_inference
 from rui_utils.utils import save_dict
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, TensorDataset
 from torch_geometric.nn import MLP
 from torchmetrics.functional.regression import mean_absolute_error, r2_score
 
-from ...nn.trainer import fit_and_inference
+
+class SimpleLightningDataModule(LightningDataModule):
+    r"""
+    Simple LightningDataModule
+    """
+
+    def __init__(
+        self, train_dataset: TensorDataset, test_dataset: TensorDataset, batch_size: int = 1024
+    ):
+        super().__init__()
+        self.train_dataset = train_dataset
+        self.test_dataset = test_dataset
+        self.batch_size = batch_size
+
+    def train_dataloader(self):
+        return DataLoader(
+            self.train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+        )
+
+    def test_dataloader(self):
+        return DataLoader(
+            self.test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=8,
+            pin_memory=True,
+        )
 
 
 class DeepRegression(LightningModule):
@@ -29,7 +60,7 @@ class DeepRegression(LightningModule):
         cell type annotation of test set (only used when training model in whole dataset)
     """
 
-    def __init__(self, config: Dict, test_cell_type: pd.Series = None):
+    def __init__(self, config: OmegaConf, test_cell_type: pd.Series = None):
         super().__init__()
         self.model = MLP([config.center_dim, config.hidden_dim, config.nbr_dim])
         self.criterion = nn.MSELoss()
@@ -101,7 +132,7 @@ class DeepRegression(LightningModule):
 def train_regress(
     x: Tensor,
     y: Tensor,
-    config: Dict,
+    config: OmegaConf,
     save_dir: str,
     cell_type: pd.Series = None,
 ) -> None:
@@ -137,14 +168,11 @@ def train_regress(
     else:
         test_cell_type = cell_type[test_idx.numpy()]
 
-    kwargs = dict(num_workers=8, pin_memory=True)
-    train_loader = DataLoader(train_data, batch_size=1024, shuffle=True, drop_last=True, **kwargs)
-    test_loader = DataLoader(test_data, batch_size=2048, shuffle=False, **kwargs)
+    data = SimpleLightningDataModule(train_data, test_data, batch_size=1024)
 
-    config.fit.model_dir = str(save_dir)
-    config.fit.work_dir = config.work_dir
+    config.trainer.model_dir = str(Path(config.work_dir) / save_dir)
     regress_model = DeepRegression(config, test_cell_type)
-    fit_and_inference(regress_model, [train_loader, test_loader], config.fit)
+    fit_and_inference(regress_model, data, config.trainer)
     test_metric = regress_model.test_metric
 
     metric_path = Path(config.work_dir) / save_dir / "test_metric.json"
@@ -153,7 +181,6 @@ def train_regress(
 
 @ray.remote(num_gpus=0.25, num_cpus=2)
 def ray_train_regress(
-    x: Tensor, y: Tensor, config: Dict, save_dir: Path, cell_type: pd.Series
+    x: Tensor, y: Tensor, config: OmegaConf, save_dir: Path, cell_type: pd.Series
 ) -> None:
-    config.fit.select_gpu = False
     return train_regress(x, y, config, save_dir, cell_type)

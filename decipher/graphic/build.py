@@ -56,6 +56,10 @@ def build_graph(
     edge_index of PyG graph
     """
     assert mode.lower() in ["radius", "knn"], f"Unsupported mode: {mode}"
+    try:
+        import torch_cluster  # noqa
+    except ImportError:
+        pyg_backend = False
 
     if mode == "radius" or batch is not None:
         if not pyg_backend:

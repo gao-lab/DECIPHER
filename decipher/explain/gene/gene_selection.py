@@ -9,8 +9,8 @@ import pandas as pd
 import ray
 import torch
 import torch_geometric.transforms as T
-from addict import Dict
 from loguru import logger
+from omegaconf import OmegaConf
 from torch import Tensor, nn
 from torch_geometric.data import Batch, Data
 from torch_geometric.nn import GAE, MLP
@@ -23,7 +23,7 @@ class SelectEncoder(nn.Module):
     Omics encoder via gene selective
     """
 
-    def __init__(self, config: Dict) -> None:
+    def __init__(self, config: OmegaConf) -> None:
         super().__init__()
         self.config = config
         self.emb2mask = MLP([config.center_dim, config.expr_dim], bias=False)
@@ -42,13 +42,17 @@ class SelectEncoder(nn.Module):
 
 
 @ray.remote(num_gpus=1, num_cpus=8)
-def ray_train_GAE(graph: Data, config: Dict, save_dir: Path, disable_gpu: bool = False):
+def ray_train_GAE(graph: Data, config: OmegaConf, save_dir: Path, disable_gpu: bool = False):
     config["select_gpu"] = False
     return train_GAE(graph, config, save_dir, disable_gpu)
 
 
 def train_GAE(
-    graph: Data | Batch, config: Dict, save_dir: Path, disable_gpu: bool = False, fp16: bool = True
+    graph: Data | Batch,
+    config: OmegaConf,
+    save_dir: Path,
+    disable_gpu: bool = False,
+    fp16: bool = True,
 ) -> None:
     r"""
     Train graph autoencoder with whole graph
@@ -70,7 +74,7 @@ def train_GAE(
     encoder = SelectEncoder(config)
     model = GAE(encoder)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr_base)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
     if torch.cuda.is_available() and not disable_gpu:
         if config.select_gpu:

@@ -6,16 +6,14 @@ from abc import ABC
 import numpy as np
 import torch
 import torch.nn.functional as F
-from addict import Dict
 from loguru import logger
+from omegaconf import OmegaConf
 from pytorch_lightning import LightningModule
-from pytorch_lightning.strategies import DDPStrategy
 from torch import Tensor, nn
 from torch_geometric.nn import MLP
+from transformers.optimization import get_cosine_schedule_with_warmup
 
-from ..layers.attn_pooling_layer import AttentionPooling
-from ..layers.transformer_layer import ViT1D
-from ..scheduler import CosineAnnealingWarmupRestarts
+from ..layers import AttentionPooling, ViT1D
 
 
 class EmbeddingModel(LightningModule, ABC):
@@ -23,13 +21,13 @@ class EmbeddingModel(LightningModule, ABC):
     Basic class embedding
     """
 
-    def __init__(self, config: Dict) -> None:
+    def __init__(self, config: OmegaConf) -> None:
         super().__init__()
         self.config = config
-        self.batched = False
-        self.center_encoder = MLP(config.gex_dims, dropout=config.dropout)
-        logger.debug(config.to_dict())
-        self.save_hyperparameters(config.to_dict())
+        logger.debug(config)
+        self.save_hyperparameters(config)
+        self.z_center_list = []
+        self.z_nbr_list = []
 
     def _reset_prams(self) -> None:
         r"""
@@ -46,23 +44,21 @@ class EmbeddingModel(LightningModule, ABC):
         """
         optimizer = torch.optim.AdamW(
             params=filter(lambda p: p.requires_grad, self.parameters()),
-            lr=self.config.lr_base,
+            lr=self.config.lr,
             weight_decay=self.config.weight_decay,
         )
-        scheduler = CosineAnnealingWarmupRestarts(
+        if not self.config.lr_scheduler:
+            return optimizer
+        scheduler = get_cosine_schedule_with_warmup(
             optimizer=optimizer,
-            first_cycle_steps=self.config.first_cycle_steps,
-            warmup_steps=self.config.warmup_steps,
-            max_lr=self.config.lr_base,
-            min_lr=self.config.lr_min,
-            gamma=0.25,
+            num_warmup_steps=self.config.warmup_steps,
+            num_training_steps=self.config.num_training_steps,
         )
         return [optimizer], [
             {
                 "scheduler": scheduler,
                 "interval": "step",
                 "frequency": 1,
-                "reduce_on_plateau": False,
                 "monitor": "train/total_loss",
             }
         ]
@@ -70,41 +66,16 @@ class EmbeddingModel(LightningModule, ABC):
     def on_exception(self, exception: Exception) -> None:
         logger.error(f"Training failed: {exception}")
 
-    # def on_after_backward(self):  # only for check unused parameters in DDP
-    #     for name, param in self.named_parameters():
-    #         if param.grad is None:
-    #             print(name)
-
-    def gather_output(self) -> tuple[np.ndarray, np.ndarray]:
-        z_center = torch.vstack(self.val_z_center_list)
-        z_nbr = torch.vstack(self.val_z_nbr_list) if len(self.val_z_nbr_list) else None
-        z_order = torch.hstack(self.val_z_order_list)
-        # if using DDP
-        if isinstance(self.trainer.strategy, DDPStrategy):
-            center_dim = z_center.size(-1)
-            z_center = self.all_gather(z_center).reshape(-1, center_dim).detach().cpu().numpy()
-            if z_nbr is not None:
-                nbr_dim = z_nbr.size(-1)
-                z_nbr = self.all_gather(z_nbr).reshape(-1, nbr_dim).detach().cpu().numpy()
-            z_order = self.all_gather(z_order).flatten().detach().cpu().numpy()
-            # NOTE: pytorch lightning automaticly padding latest epoch in DDP
-            _, unique_idx = np.unique(z_order, return_index=True)
-            if not self.trainer.sanity_checking:
-                z_center = z_center[unique_idx]
-                z_nbr = z_nbr[unique_idx] if z_nbr is not None else None
+    def gather_output(self) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+        z_center = np.vstack(self.z_center_list)
+        if len(self.z_nbr_list) > 0:
+            z_nbr = np.vstack(self.z_nbr_list)
+        self.z_center_list = []
+        self.z_nbr_list = []
+        if len(z_nbr) > 0:
+            return z_center, z_nbr
         else:
-            z_center = z_center.detach().cpu().numpy()
-            z_nbr = z_nbr.detach().cpu().numpy() if z_nbr is not None else None
-            # z_order = z_order.detach().cpu().numpy()
-        self.val_z_center_list = []
-        self.val_z_nbr_list = []
-        self.val_z_order_list = []
-        return z_center, z_nbr
-
-    def on_test_start(self):
-        self.val_z_center_list = []
-        self.val_z_nbr_list = []
-        self.val_z_order_list = []  # order for multi-gpu inference
+            return z_center
 
 
 class NeighborEmbeddingModel(EmbeddingModel, ABC):
@@ -112,18 +83,18 @@ class NeighborEmbeddingModel(EmbeddingModel, ABC):
     Transformer-based neighbor embedding model
     """
 
-    def __init__(self, config: Dict) -> None:
+    def __init__(self, config: OmegaConf) -> None:
         super().__init__(config)
-
+        self.center_encoder = MLP(list(config.gex_dims), dropout=config.dropout)
         self.nbr_encoder = ViT1D(
             config.emb_dim, config.transformer_layers, config.num_heads, config.dropout
         )
-        self.projection_head = MLP(config.prj_dims, dropout=config.dropout)
+        self.projection_head = MLP(list(config.prj_dims), dropout=config.dropout)
         if config.spatial_emb == "attn":
             self.attn_pool = AttentionPooling(config.emb_dim, config.emb_dim // 2, config.dropout)
 
         self.augment = None  # need to be set in subclass
-        self.center_encoder = None  # need to be set in subclas
+        self.center_encoder = None  # need to be set in subclass
 
     def create_attn_mask(self, x: Tensor) -> Tensor:
         r"""

@@ -1,9 +1,12 @@
 r"""
-`DECIPHER` package for learing high-fidelity disentangling embedding from spatial omics
+`DECIPHER` package for learning high-fidelity disentangling embedding from spatial omics
 """
 
 import warnings
 from importlib.metadata import version
+from pathlib import Path
+
+from omegaconf import OmegaConf
 
 ignore_warnings = [
     "The 'nopython' keyword",
@@ -22,8 +25,9 @@ ignore_warnings = [
 for ignore_warning in ignore_warnings:
     warnings.filterwarnings("ignore", message=f".*{ignore_warning}.*")
 
+CFG = OmegaConf.load(Path(__file__).parent / "cfg.yaml")
+
 from .cls import DECIPHER  # noqa
-from .utils import CFG  # noqa
 
 name = "cell-decipher"
 __version__ = version(name)

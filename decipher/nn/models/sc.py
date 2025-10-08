@@ -1,8 +1,10 @@
 r"""
 Single cell contrastive learning model
 """
-from addict import Dict
+import torch
+from omegaconf import OmegaConf
 from torch import Tensor
+from torch_geometric.nn import MLP
 
 from ...data.augment import ScAugment
 from ..loss import NTXentLoss
@@ -11,21 +13,20 @@ from ._basic import EmbeddingModel
 
 class ScSimCLR(EmbeddingModel):
     r"""
-    Single cell embedding
+    SimCLR framework for single cell data
 
-    Parameters
-    ----------
-    config:
-        model configuration
+    Args:
+        config: model configuration
     """
 
-    def __init__(self, config: Dict) -> None:
+    def __init__(self, config: OmegaConf) -> None:
         super().__init__(config)
-        self.augment = ScAugment(config.augment)
+        self.center_encoder = MLP(list(config.gex_dims), dropout=config.dropout)
+        self.augment = ScAugment()
         self.criterion = NTXentLoss(config.temperature_center)
         self._reset_prams()
 
-    def training_step(self, batch: list[Tensor], batch_idx: int) -> Tensor:
+    def forward(self, batch: list[Tensor], batch_idx: int) -> Tensor:
         x1, x2 = self.augment(batch[0])
         z1 = self.center_encoder(x1)
         z2 = self.center_encoder(x2)
@@ -34,36 +35,20 @@ class ScSimCLR(EmbeddingModel):
         return loss
 
     def test_step(self, data: list[Tensor], batch_idx: int) -> None:
-        x, order = data
+        x = data
         z = self.center_encoder(x)
-        self.val_z_center_list.append(z)
-        self.val_z_order_list.append(order)
+        self.z_center_list.append(z.detach().to(torch.float32).cpu().numpy())
 
+    def training_step(self, batch: dict | list[Tensor], batch_idx: int) -> Tensor:
+        if isinstance(batch, list):
+            return self.forward(batch, batch_idx)
 
-class ScSimCLRMNN(ScSimCLR):
-    r"""
-    Single cell MNN-based embedding for batch correction
+        # with batch
+        assert isinstance(batch, dict)
+        x, mnn = batch["x"], batch["mnn"]
+        contrast_loss = self.forward(x, batch_idx)
 
-    Parameters
-    ----------
-    config:
-        model configuration
-    """
-
-    def __init__(self, config: Dict) -> None:
-        super().__init__(config)
-
-    def training_step(self, batch: list[Tensor] | dict, batch_idx: int) -> Tensor:
-        if isinstance(batch, dict):  # with extra data
-            x, mnn = batch["x"], batch["mnn"]
-            contrast_loss = super().training_step(x, batch_idx)
-        elif isinstance(batch, list):  # without extra data
-            mnn = batch
-            contrast_loss1 = super().training_step(mnn[0], batch_idx)
-            contrast_loss2 = super().training_step(mnn[1], batch_idx)
-            contrast_loss = (contrast_loss1 + contrast_loss2) * 0.5
-
-        mnn_loss = self.mnn_step(mnn)
+        mnn_loss = self.get_mnn_loss(mnn)
         loss = contrast_loss + mnn_loss
         self.log_dict(
             {
@@ -75,14 +60,12 @@ class ScSimCLRMNN(ScSimCLR):
         )
         return loss
 
-    def mnn_step(self, mnn: tuple[Tensor]) -> Tensor:
+    def get_mnn_loss(self, mnn: tuple[Tensor]) -> Tensor:
         r"""
-        MNN forward step for batch correction
+        MNN loss for batch correction
 
-        Parameters
-        ----------
-        mnn:
-            MNN pairs (x1, x2)
+        Args:
+            mnn: MNN pairs (x1, x2)
         """
         x1, x2 = mnn
         z1 = self.center_encoder(x1)

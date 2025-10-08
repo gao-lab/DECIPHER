@@ -2,8 +2,7 @@ import numpy as np
 import scanpy as sc
 from rui_utils.utils import GetRunTime
 
-from decipher import DECIPHER
-from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, global_seed
+from decipher import CFG, DECIPHER
 
 
 def get_adata() -> sc.AnnData:
@@ -32,17 +31,15 @@ def get_adata_2() -> sc.AnnData:
 def test_decipher_single_slice():
     adata = get_adata()
 
-    global_seed(0)
-    CFG.omics.model.augment.dropout_gex = 0.6
-    CFG.omics.model.epochs = 2
-    CFG.omics.loader.batch_size = 64
-    CFG.omics.pretrain.force = True
-    CFG.omics.pretrain.epochs = 2
-    GENESELECT_CFG.gae_epochs = 2
-    REGRESS_CFG.fit.epochs = 2
+    CFG.sc_model.trainer.epochs = 2
+    CFG.sc_model.loader.batch_size = 64
+    CFG.sp_model.trainer.epochs = 2
+    CFG.sp_model.loader.batch_size = 64
+    CFG.gene_select.gae_epochs = 2
+    CFG.regress.trainer.epochs = 2
     work_dir = "./results/decipher_single_slice"
 
-    model = DECIPHER(work_dir=work_dir, user_cfg=CFG)
+    model = DECIPHER(work_dir=work_dir, overwrite=True)
     model.register_data(adata)
 
     model.fit_omics()
@@ -53,7 +50,6 @@ def test_decipher_single_slice():
 
     # test the recovery of the model
     model_recover = DECIPHER(work_dir=work_dir, recover=True)
-    CFG.omics.pretrain.force = False
     model_recover.fit_omics()
 
 
@@ -62,18 +58,16 @@ def test_decipher_multi_slices():
     adata_1, adata_2 = get_adata(), get_adata_2()
     adata = adata_1.concatenate(adata_2)
 
-    global_seed(0)
-    CFG.omics.model.augment.dropout_gex = 0.6
-    CFG.omics.model.epochs = 2
-    CFG.omics.loader.batch_size = 64
-    CFG.omics.pretrain.force = True
-    CFG.omics.pretrain.epochs = 2
-    GENESELECT_CFG.gae_epochs = 2
-    REGRESS_CFG.fit.epochs = 2
+    CFG.sc_model.trainer.epochs = 2
+    CFG.sc_model.loader.batch_size = 64
+    CFG.sp_model.trainer.epochs = 2
+    CFG.sp_model.loader.batch_size = 64
+    CFG.gene_select.gae_epochs = 2
+    CFG.regress.trainer.epochs = 2
     work_dir = "./results/decipher_multi_slices"
 
-    model = DECIPHER(work_dir=work_dir, user_cfg=CFG)
-    model.register_data([adata_1, adata_2], group_list=["batch_1", "batch_2"])
+    model = DECIPHER(work_dir=work_dir, overwrite=True)
+    model.register_data([adata_1, adata_2])
 
     model.fit_omics()
 
@@ -83,8 +77,7 @@ def test_decipher_multi_slices():
 
     # test the recovery of the model
     model_recover = DECIPHER(work_dir=work_dir, recover=True)
-    CFG.omics.pretrain.force = False
-    model_recover.fit_omics()
+    model_recover.fit_spatial()
 
 
 if __name__ == "__main__":

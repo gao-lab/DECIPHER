@@ -1,251 +1,103 @@
-r"""
-Get omics embedding and spatial embedding
-"""
 import os
 from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
 import torch
-from addict import Dict
 from loguru import logger
+from rui_utils.torch.trainer import init_trainer
+from rui_utils.utils import l2norm
 from torch import Tensor
 from torch.utils.data import Dataset, TensorDataset
 from torch_geometric.data import Data
 
-from .data.mnn_dataset import LightningScMNNData, LightningSpatialMNNData
-from .nn.models.sc import ScSimCLR, ScSimCLRMNN
-from .nn.models.spatial import OmicsSpatialSimCLR, OmicsSpatialSimCLRMNN
-from .nn.trainer import fit, fit_and_inference
+from . import CFG
+from .data.mnn_dataset import LightningScMNNData, get_graph_datamodule
+from .nn import ScSimCLR, SpatialSimCLR
 
 
-def _update_config(n_obs: int, gene_dim: int, config: Dict) -> Dict:
+class ScModel:
     r"""
-    Update the config before training
+    Single cell embedding model
 
-    Parameters
-    ----------
-    n_obs
-        number of train elements
-    gene_dim
-        number of genes
-    config
-        model config
+    Args:
+        x: gene expression matrix
+        mnn_dataset: MNN dataset
     """
-    config.model.gex_dims[0] = gene_dim
-    logger.info(f"Using {gene_dim} genes as model input.")
 
-    # set max steps
-    batch_size = config.loader.batch_size * config.model.device_num
-    step_per_batch = n_obs // batch_size
-    max_steps = config.model.epochs * step_per_batch
-    max_steps = min(max_steps, config.model.max_steps)
-    max_steps = max(max_steps, step_per_batch)
-    config.model.max_steps = max_steps
+    def __init__(self, x, mnn_dataset):
+        train_dataset = TensorDataset(torch.from_numpy(x))
+        self.datamodule = LightningScMNNData(CFG.sc_model.loader, train_dataset, mnn_dataset)
+        self.model = ScSimCLR(CFG.sc_model.model)
 
-    # set scheduler config
-    if max_steps < 500:
-        logger.warning(f"Too few steps {max_steps}, try train more epochs.")
-    config.model.warmup_steps = min(int(0.1 * max_steps), config.model.warmup_steps)
-    config.model.first_cycle_steps = min(config.model.first_cycle_steps, max_steps)
+        self.trainer = init_trainer(CFG.sc_model.trainer)
 
-    return config.copy()
+    def train(self) -> None:
+        self.trainer.fit(self.model, self.datamodule)
+
+    def infer(self, norm: bool = True) -> np.ndarray:
+        self.trainer.test(self.model, self.datamodule)
+        emb = self.model.gather_output()
+        if norm:
+            emb = l2norm(emb.astype(np.float32))
+        return emb
 
 
-def spatial_emb(
-    x: np.ndarray,
-    spatial_edge: Tensor,
-    config: Dict,
-    mnn_dataset: Dataset = None,
-    pretrained_model: ScSimCLR = None,
-    batch: np.ndarray = None,
-    DDP: bool = False,
-) -> tuple[np.ndarray, np.ndarray] | None:
+class SpatialModel:
     r"""
-    Spatial omics embedding
+    Spatial embedding model
 
-    Parameters
-    ----------
-    x
-        omics expression matrix
-    spatial_edge
-        spatial edge index
-    config
-        model config
-    mnn_dataset
-        mnn dataset
-    pretrained_model
-        pre-trained single cell model
-    batch
-        batch index
-    DDP
-        whether use DDP
-
-    Returns
-    ----------
-    center_emb
-        omics embedding
-    nbr_emb
-        spatial embedding
+    Args:
+        x: gene expression matrix
+        spatial_edge: spatial graph edge index
+        mnn_dataset: MNN dataset
+        batch: batch labels
+        pretrained_model: pre-trained single cell model
     """
-    config = _update_config(x.shape[0], x.shape[1], config)
-    graph = Data(x=torch.from_numpy(x), edge_index=spatial_edge)
-    if batch is not None:
-        graph.sc_batch = torch.tensor(batch, dtype=int)
-    datamodule = get_graph_datamodule(graph, config, mnn_dataset)
 
-    if mnn_dataset is None:
-        model = OmicsSpatialSimCLR(config.model)
-    else:
-        model = OmicsSpatialSimCLRMNN(config.model)
+    def __init__(
+        self,
+        x: np.ndarray,
+        spatial_edge: Tensor,
+        mnn_dataset: Dataset = None,
+        batch: np.ndarray = None,
+        pretrained_model: ScSimCLR = None,
+    ):
+        graph = Data(x=torch.from_numpy(x), edge_index=spatial_edge)
+        if batch is not None:
+            graph.sc_batch = torch.tensor(batch, dtype=int)
+        self.datamodule = get_graph_datamodule(graph, mnn_dataset)
+        self.model = SpatialSimCLR(CFG.sp_model.model)
 
-    if pretrained_model is not None:
-        model.center_encoder = deepcopy(pretrained_model.center_encoder)
-        # logger.error("NOT support pretrained single cell model.")
-    else:
-        logger.warning("NOT use pretrained single cell model.")
+        if pretrained_model is not None:
+            self.model.center_encoder = deepcopy(pretrained_model.center_encoder)
+        self.trainer = init_trainer(CFG.sp_model.trainer)
 
-    if DDP:
-        fit(model, datamodule, config.model, show_name="spatial omics DDP")
-    else:
-        fit_and_inference(model, datamodule, config.model, show_name="spatial omics")
-        center_emb, nbr_emb = model.gather_output()
+    def train(self) -> None:
+        self.trainer.fit(self.model, self.datamodule)
+
+    def infer(self, norm: bool = True) -> tuple[np.ndarray, np.ndarray]:
+        self.trainer.test(self.model, self.datamodule)
+        center_emb, nbr_emb = self.model.gather_output()
+        if norm:
+            center_emb = l2norm(center_emb.astype(np.float32))
+            nbr_emb = l2norm(nbr_emb.astype(np.float32))
         return center_emb, nbr_emb
 
 
-def sc_emb(
-    x: np.ndarray,
-    config: Dict,
-    mnn_dataset: Dataset = None,
-    batch: np.ndarray = None,
-) -> tuple[ScSimCLR, np.ndarray | None]:
-    r"""
-    Pre-train omics encoder
-
-    Parameters
-    ----------
-    x:
-        omics expression matrix
-    config:
-        model config
-    mnn_dataset:
-        mnn dataset
-    batch:
-        batch index
-
-    Returns
-    -----------
-    model
-        Pre-trained omics encoder
-    center_emb
-        omics embedding
-    """
-    config = deepcopy(config)
-    config.model.update(config.pretrain)
-    mnn_flag = True if mnn_dataset is not None else False
-    if not config.pretrain.force:
-        try:
-            return load_sc_model(config, mnn_flag), None
-        except Exception as e:  # noqa
-            logger.info(f"Not found pre-trained model: {e}")
-
-    config = _update_config(x.shape[0], x.shape[1], config)
-
-    if batch is not None:
-        train_dataset = TensorDataset(torch.from_numpy(x))  # FIXME: add batch
-    else:
-        train_dataset = TensorDataset(torch.from_numpy(x))
-    val_dataset = TensorDataset(torch.from_numpy(x), torch.arange(x.shape[0], dtype=torch.int32))
-    datamodule = LightningScMNNData(config.loader, train_dataset, val_dataset, mnn_dataset)
-
-    if mnn_flag:
-        model = ScSimCLRMNN(config.model)
-    else:
-        model = ScSimCLR(config.model)
-
-    if config.model.fix_sc:
-        fit_and_inference(model, datamodule, config.model, show_name="single cell")
-        center_emb, _ = model.gather_output()
-    else:
-        fit(model, datamodule, config=config.model, show_name="single cell")
-        center_emb = None
-    return model, center_emb
-
-
-def load_sc_model(config, mnn_flag: bool):
+def load_model(dir: str, model_cfg, spatial: bool = False) -> ScSimCLR | SpatialSimCLR:
     r"""
     Load omics encoder model
 
-    Parameters
-    ----------
-    config
-        model config
-    mnn_flag
-        whether use mnn
+    Args:
+        dir: model directory
+        model_cfg: model config
+        spatial: whether load spatial model
     """
-    model_path = Path(config.model.work_dir) / "pretrain"
+    model_cls = SpatialSimCLR if spatial else ScSimCLR
     # sort by modification time
-    model_path = sorted(model_path.glob("*.ckpt"), key=os.path.getmtime)[-1]
+    model_path = sorted(Path(dir).glob("*.ckpt"), key=os.path.getmtime)[-1]
     logger.info(f"Loading model from {model_path}")
-    kwargs = {"config": config.model}
-    if mnn_flag:
-        sc_model = ScSimCLRMNN.load_from_checkpoint(model_path, **kwargs)
-    else:
-        sc_model = ScSimCLR.load_from_checkpoint(model_path, **kwargs)
-    logger.success(f"Pre-trained sc model loaded from {model_path}.")
-    return sc_model
-
-
-def load_spatial_model(config, mnn_flag: bool):
-    r"""
-    Load decipher spatial model
-
-    Parameters
-    ----------
-    config
-        model config
-    mnn_flag
-        whether use mnn
-    """
-    model_path = Path(config.model.work_dir) / "model"
-    model_path = sorted(model_path.glob("*.ckpt"), key=os.path.getmtime)[-1]
-    logger.info(f"Loading model from {model_path}")
-    config.model.device_num = 1
-    kwargs = {"config": config.model}
-    if mnn_flag:
-        model = OmicsSpatialSimCLRMNN.load_from_checkpoint(model_path, **kwargs)
-    else:
-        model = OmicsSpatialSimCLR.load_from_checkpoint(model_path, **kwargs)
-    logger.success(f"Pre-trained spatial model loaded from {model_path}.")
+    model = model_cls.load_from_checkpoint(model_path, config=model_cfg)
+    logger.success(f"Pre-trained model loaded from {model_path}.")
     return model
-
-
-def get_graph_datamodule(graph: Data, config: Dict, mnn_dataset=None) -> LightningSpatialMNNData:
-    r"""
-    Build `LightningNodeMNNData` datamodule
-
-    Parameters
-    ----------
-    graph
-        spatial graph
-    config
-        model config
-    mnn_dataset
-        mnn dataset
-    """
-    # del config.loader["shuffle"]
-
-    mask = torch.ones(graph.num_nodes, dtype=torch.bool)
-    datamodule = LightningSpatialMNNData(
-        graph,
-        config.loader,
-        mnn_dataset,
-        num_neighbors=config.num_neighbors,
-        input_train_nodes=mask,
-        input_val_nodes=mask,
-        input_test_nodes=mask,
-        subgraph_type="bidirectional",
-        disjoint=True,
-        eval_loader_kwargs={"drop_last": False},
-    )
-    return datamodule

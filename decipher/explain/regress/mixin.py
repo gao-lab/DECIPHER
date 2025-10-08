@@ -12,10 +12,10 @@ import ray
 import scanpy as sc
 import torch
 import yaml
-from addict import Dict
 from loguru import logger
+from omegaconf import OmegaConf
 
-from ...utils import REGRESS_CFG
+from ... import CFG
 from .regression import ray_train_regress, train_regress
 
 
@@ -34,7 +34,6 @@ class RegressMixin:
         regress_per_celltype: bool = True,
         reverse_regress: bool = False,
         min_cells: int = 100,
-        user_cfg: Dict = {},
         n_jobs: int = -1,
     ):
         r"""
@@ -45,7 +44,7 @@ class RegressMixin:
         Parameters
         ----------
         adata
-            AnnData object
+            AnnData object, must same with
         cell_type
             Cell type column name in `obs` of AnnData
         explain_dir
@@ -60,8 +59,6 @@ class RegressMixin:
             If train reverse regress model
         min_cells
             Minimum cells for each cell type
-        user_cfg
-            User config for explain model
         n_jobs
             Number of jobs to run in parallel
         """
@@ -69,17 +66,13 @@ class RegressMixin:
         assert hasattr(self, "nbr_emb"), "Lack self.nbr_emb, Please run `fit_omics()` first."
 
         # set config
-        cfg_explain = deepcopy(REGRESS_CFG)
+        cfg_explain = CFG.regress
         explain_work_dir = self.work_dir / explain_dir
         explain_work_dir.mkdir(exist_ok=True, parents=True)
         cfg_explain.work_dir = str(explain_work_dir)
-
-        cfg_explain.update(user_cfg)
         cfg_explain.center_dim = self.center_emb.shape[1]
         cfg_explain.nbr_dim = self.nbr_emb.shape[1]
-        cfg_explain.work_dir = str(explain_work_dir)
-        with open(explain_work_dir / "regress_config.yaml", "w") as f:
-            yaml.dump(cfg_explain.to_dict(), f)
+        OmegaConf.save(cfg_explain, explain_work_dir / "regress_config.yaml")
         logger.debug(f"Regress config: {cfg_explain}")
 
         # prepare data
@@ -179,7 +172,7 @@ def train_regress_parallel(
         regress_dirs += regress_dirs_rev
         cfg_explain_list = [cfg_explain] * n_datasets + [cfg_explain_rev] * n_datasets
     else:
-        cfg_explain_list = [cfg_explain] * n_datasets
+        cfg_explain_list = [deepcopy(cfg_explain)] * n_datasets
 
     if n_jobs == 1:
         for xy, cfg, save_dir in zip(xy_list, cfg_explain_list, regress_dirs):

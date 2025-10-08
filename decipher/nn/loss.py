@@ -85,15 +85,3 @@ class NTXentLoss(nn.Module):
         logits = logits / self.temperature
 
         return self.criterion(logits, labels)
-
-
-if __name__ == "__main__":
-    loss = NTXentLoss()
-    z1 = torch.randn(128, 16)
-    z2 = torch.randn(128, 16)
-    batch_mask = None
-    batch_mask = torch.randn(128, 128) > 0
-    # set diagonal to True
-    batch_mask = batch_mask.fill_diagonal_(True)
-    output = loss(z1, z2, batch_mask)
-    print(output)
