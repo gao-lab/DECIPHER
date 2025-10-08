@@ -8,13 +8,13 @@ import ray
 import torch
 from addict import Dict
 from pytorch_lightning import LightningModule
+from rui_utils.utils import save_dict
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, TensorDataset
 from torch_geometric.nn import MLP
 from torchmetrics.functional.regression import mean_absolute_error, r2_score
 
 from ...nn.trainer import fit_and_inference
-from ...utils import save_dict
 
 
 class DeepRegression(LightningModule):

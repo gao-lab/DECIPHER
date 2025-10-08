@@ -1,5 +1,5 @@
 {
-  "python.defaultInterpreterPath": "${workspaceRoot}/conda/bin/python",
+  // "python.defaultInterpreterPath": "${workspaceRoot}/conda/bin/python",
   "files.watcherExclude": {
     "**/conda/**": true,
     "**/data/**": true,
@@ -11,7 +11,8 @@
     "**/__pycache__/**": true,
     "**/*.deprecated/**": true,
     "**/*.bak/**": true,
-    "**/*.old/**": true
+    "**/*.old/**": true,
+    "**/.venv/**": true,
   },
   "files.exclude": {
     "**/.snakemake/**": true,
@@ -26,6 +27,7 @@
     "**/._**": true,
     "coverage.xml": true,
     ".coverage**": true,
+    "**/.venv/**": true,
   },
   "jupyter.jupyterServerType": "local",
   "python.tensorboard.logDirectory": "logs/",

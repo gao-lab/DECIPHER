@@ -71,7 +71,7 @@ def get_lr_expr(
     lr_idx = [x in lr_genes for x in adata.var.index]
     adata = adata[:, lr_idx]
     gene_idx = np.arange(adata.n_vars)
-    gene_idx = _filter_gene(adata.X.A, gene_idx)
+    gene_idx = _filter_gene(adata.X.toarray(), gene_idx)
     adata = adata[:, gene_idx].copy()
     sc.pp.filter_genes(adata, min_cells=30)
     logger.info(f"Find {adata.n_vars} LR-related genes.")
@@ -79,7 +79,7 @@ def get_lr_expr(
     # merge neighbor expr
     edge_index = build_graph(adata.obsm["spatial"], radius=radius, mode="radius")
     aggr_net = SimpleConv(aggr=aggr, combine_root=None)
-    expr = torch.from_numpy(adata.X.A) if isspmatrix(adata.X) else torch.from_numpy(adata.X)
+    expr = torch.from_numpy(adata.X.toarray()) if isspmatrix(adata.X) else torch.from_numpy(adata.X)
     expr_neighbors = aggr_net(expr, edge_index)
 
     # get the ligand and receptor gene index in adata.var

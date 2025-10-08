@@ -5,7 +5,7 @@ from loguru import logger
 from decipher import CFG, DECIPHER
 
 
-def manual_test_ddp():
+def test_ddp():
     r"""
     DDP can not be run in pytest pipeline, only for manual test
     """
@@ -31,4 +31,4 @@ def manual_test_ddp():
 
 
 if __name__ == "__main__":
-    manual_test_ddp()
+    test_ddp()

@@ -1,8 +1,9 @@
 import numpy as np
 import scanpy as sc
+from rui_utils.utils import GetRunTime
 
 from decipher import DECIPHER
-from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, GetRunTime, global_seed
+from decipher.utils import CFG, GENESELECT_CFG, REGRESS_CFG, global_seed
 
 
 def get_adata() -> sc.AnnData:

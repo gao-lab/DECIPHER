@@ -196,7 +196,7 @@ sc.pl.umap(tam, color=['SPP1', 'C1QC', 'leiden_gex_0'], cmap='viridis')
 
 # %%
 tam.obs['subtype'] = 'Others'
-tam.obs.loc[np.squeeze(tam.X[:, genes.index.get_loc('SPP1')].A > 4), 'subtype'] = 'SPP1+'
+tam.obs.loc[np.squeeze(tam.X[:, genes.index.get_loc('SPP1')].toarray() > 4), 'subtype'] = 'SPP1+'
 # tam.obs.loc[tam.obs['leiden_gex_0'].isin(['1', '2', '15']), 'subtype'] = 'SPP1+'
 
 # %%
