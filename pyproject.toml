@@ -6,8 +6,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "cell-decipher"
 packages = [{include = "decipher"}]
-version = "0.2.2"
-description = "Spatial-omics data embedding and analysis"
+version = "0.3.0"
+description = "DECIPHER for learning disentangled cellular embeddings in large-scale heterogeneous spatial omics data"
 readme = "README.md"
 license = "MIT"
 authors = ["Chen-Rui Xia <xiachenrui@mail.cbi.pku.edu.cn>"]
@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
 
@@ -43,13 +44,14 @@ bs4 = "*"
 rui_utils = "*"
 harmony-pytorch = "*"
 
-torch = ">=2.0"
+torch = ">=2.0, <2.9"
 torchvision = "*"
 torchaudio = "*"
 pytorch-lightning = ">=2.1"
 torch_geometric = ">=2.3.0"
 tensorboard = "*"
 einops = "*"
+transformers = "*"
 
 sphinx = {version = "<=6.2.1", optional = true}
 sphinx-autodoc-typehints = {version = "*", optional = true}
@@ -69,24 +71,18 @@ papermill = {version = "*", optional = true}
 jupyter = {version = "*", optional = true}
 jupyter_contrib_nbextensions = {version = "*", optional = true}
 jupytext = {version = "*", optional = true}
-ipykernel = {version = "*", optional = true}
 nbformat = {version = "*", optional = true}
 pre-commit = {version = "*", optional = true}
 black = {version = "*", optional = true}
 isort = {version = "*", optional = true}
 py-spy = {version = "*", optional = true}
-bokeh = {version = "*", optional = true}
-datatable = {version = "*", optional = true}
-parse = {version = "*", optional = true}
-plotly = {version = "*", optional = true}
-kaleido = {version = "*", optional = true}
 
 [tool.poetry.extras]
 docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-intl",
         "nbsphinx", "sphinx-rtd-theme", "sphinx_gallery", "jinja2", "myst-parser"]
 dev = ["pytest", "pytest-sugar", "pytest-cov", "pytest-xdist",
-        "papermill", "jupyter","jupyter_contrib_nbextensions", "ipykernel", "nbformat", "jupytext",
-        "pre-commit", "black", "isort", "py-spy", "bokeh", "datatable", "parse", "plotly", "kaleido"]
+        "papermill", "jupyter","jupyter_contrib_nbextensions", "nbformat", "jupytext",
+        "pre-commit", "black", "isort", "py-spy"]
 
 [tool.pyright]
 include = ["decipher"]
@@ -106,8 +102,8 @@ source = ["decipher"]
 show_missing = true
 
 [tool.poetry.scripts]
-decipher_ddp_sc = "decipher.ddp:decipher_ddp_sc"
-decipher_ddp_spatial = "decipher.ddp:decipher_ddp_spatial"
+decipher_ddp_sc = "decipher.utils:decipher_ddp_sc"
+decipher_ddp_spatial = "decipher.utils:decipher_ddp_spatial"
 install_pyg_dependencies = "decipher.utils:install_pyg_dep"
 
 [tool.jupytext]

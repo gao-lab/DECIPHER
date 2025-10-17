@@ -8,7 +8,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy DECIPHER package and install
-# USER rapids
 WORKDIR /app
 COPY ./decipher ./decipher
 COPY ./README.md ./README.md

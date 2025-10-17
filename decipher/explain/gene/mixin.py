@@ -7,8 +7,8 @@ import pandas as pd
 import ray
 import scanpy as sc
 import torch
-import yaml
 from loguru import logger
+from omegaconf import OmegaConf
 from scanpy._utils import check_nonnegative_integers
 from scipy.sparse import issparse
 from torch_geometric.data import Batch, Data
@@ -82,8 +82,7 @@ class GeneSelectMixin:
         cfg.center_dim = self.center_emb.shape[1]
         cfg.nbr_dim = self.nbr_emb.shape[1]
         cfg.work_dir = str(work_dir)
-        with open(work_dir / "gene_select_config.yaml", "w") as f:
-            yaml.dump(cfg, f)
+        OmegaConf.save(cfg, work_dir / "gene_select_config.yaml")
         logger.debug(f"Gene select config: {cfg}")
 
         # prepare data

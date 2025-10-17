@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 import ray
 import torch
+from loguru import logger
 from omegaconf import OmegaConf
 from pytorch_lightning import LightningDataModule, LightningModule
 from rui_utils.torch.trainer import fit_and_inference
@@ -126,7 +127,11 @@ class DeepRegression(LightningModule):
             "test_r2_score": float(r2),
             "test_mae_score": float(mae),
         }
-        self.log_dict(self.test_metric, prog_bar=True)
+        try:
+            self.log_dict(self.test_metric, prog_bar=True)
+        except Exception as e:  # noqa
+            logger.error(f"Error logging test metrics: {e}")
+            print(self.test_metric)
 
 
 def train_regress(
@@ -173,6 +178,8 @@ def train_regress(
     config.trainer.model_dir = str(Path(config.work_dir) / save_dir)
     regress_model = DeepRegression(config, test_cell_type)
     fit_and_inference(regress_model, data, config.trainer)
+    if not hasattr(regress_model, "test_metric"):
+        regress_model.on_test_epoch_end()
     test_metric = regress_model.test_metric
 
     metric_path = Path(config.work_dir) / save_dir / "test_metric.json"

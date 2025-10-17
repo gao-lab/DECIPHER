@@ -93,6 +93,9 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
             self.edge_index = edge_index
         np.save(self.work_dir / "edge_index.npy", self.edge_index.numpy())
 
+        # Save hyperparameters
+        OmegaConf.save(CFG, self.work_dir / "hyperparams.yaml")
+
     def fit_sc(self) -> None:
         r"""
         Fit on single cell data
@@ -133,7 +136,6 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
         # save embeddings
         np.save(self.work_dir / "center_emb.npy", self.center_emb)
         np.save(self.work_dir / "nbr_emb.npy", self.nbr_emb)
-        OmegaConf.save(CFG, self.work_dir / "hyperparams.yaml")
         logger.info(f"Results saved to {self.work_dir}")
 
     def load(self, from_dir: str) -> None:
@@ -170,6 +172,7 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
         max_gpus = torch.cuda.device_count()
         assert max_gpus > 1, "DDP requires at least 2 GPUs."
         gpus = min(gpus, max_gpus) if gpus > 0 else max_gpus
+        logger.info(f"Using {gpus} GPUs for DDP training.")
 
         # DDP fit omics
         subprocess.run(
