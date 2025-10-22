@@ -58,6 +58,7 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
         split_by: str = None,
         preprocess: bool = True,
         edge_index: np.ndarray = None,
+        save_data: bool = True,
     ) -> None:
         r"""
         Register spatial omics data
@@ -73,10 +74,11 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
         edge_index
             use self-defined spatial neighbor edges (PyG format), only for advanced users
         """
-        # preprocess single cell data
-        adata, self.batch_idx = omics_data_process(adata, split_by, preprocess)
-        self.x = adata.X.astype(np.float32)
-        np.save(self.work_dir / "x.npy", self.x)
+        # process spatial omics data
+        self.x, coords, self.batch_idx = omics_data_process(adata, split_by, preprocess)
+        del adata
+        if save_data:
+            np.save(self.work_dir / "x.npy", self.x)
 
         # mnn correction
         if self.batch_idx is not None:
@@ -87,9 +89,10 @@ class DECIPHER(RegressMixin, GeneSelectMixin):
 
         # build spatial graph
         if edge_index is None:
-            self.edge_index = build_graph(adata.obsm["spatial"], self.batch_idx, **CFG.graph)
+            self.edge_index = build_graph(coords, self.batch_idx, **CFG.graph)
         else:
             logger.info("Use self-defined edge index.")
+            assert edge_index.max() < self.x.shape[0], "Edge index out of range."
             self.edge_index = edge_index
         np.save(self.work_dir / "edge_index.npy", self.edge_index.numpy())
 

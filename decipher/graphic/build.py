@@ -7,7 +7,7 @@ import torch
 from loguru import logger
 from torch import Tensor
 from torch_geometric.nn import knn_graph, radius_graph
-from torch_geometric.utils import to_undirected
+from torch_geometric.utils import sort_edge_index, to_undirected
 
 from ..utils import estimate_spot_distance
 from .knn import knn
@@ -108,13 +108,13 @@ def build_graph(
     )
     if mode == "radius":
         num_neighbors = edge_index[0].bincount().float()
-        logger.info(f"Mean number of neighbors: {num_neighbors.mean().item():.2f}")
-        logger.info(f"Max number of neighbors: {num_neighbors.max().item()}")
-        logger.info(f"Min number of neighbors: {num_neighbors.min().item()}")
-        logger.info(f"Median number of neighbors: {num_neighbors.median().item()}")
+        logger.debug(f"Mean number of neighbors: {num_neighbors.mean().item():.2f}")
+        logger.debug(f"Max number of neighbors: {num_neighbors.max().item()}")
+        logger.debug(f"Min number of neighbors: {num_neighbors.min().item()}")
+        logger.debug(f"Median number of neighbors: {num_neighbors.median().item()}")
         for percentile in [0.05, 0.25, 0.75, 0.95]:
             tile = num_neighbors.kthvalue(int(num_neighbors.numel() * percentile)).values.item()
-            logger.info(f"{percentile * 100}th percentile of number of neighbors: {tile}")
+            logger.debug(f"{percentile * 100}th percentile of number of neighbors: {tile}")
     return edge_index
 
 
@@ -135,4 +135,4 @@ def knn_to_edge_index(knn_result: np.ndarray) -> Tensor:
 
     edge_index = torch.stack([src_nodes, dst_nodes], dim=0)
 
-    return edge_index
+    return sort_edge_index(edge_index)

@@ -13,7 +13,7 @@ from .. import CFG
 
 
 def omics_data_process(
-    adata: list[AnnData] | AnnData,
+    adata_raw: list[AnnData] | AnnData,
     split_by: str = None,
     preprocess: bool = True,
 ) -> tuple[AnnData, np.ndarray | None]:
@@ -34,12 +34,14 @@ def omics_data_process(
     Preprocessed AnnData
     """
     batch_idx = None
-    if isinstance(adata, AnnData):
-        if split_by is not None and split_by in adata.obs.columns:
-            batch_idx = LabelEncoder().fit_transform(adata.obs[split_by])
+    if isinstance(adata_raw, AnnData):
+        if split_by is not None and split_by in adata_raw.obs.columns:
+            batch_idx = LabelEncoder().fit_transform(adata_raw.obs[split_by])
+        adata = adata_raw.copy()
     else:
-        adata = adata[0].concatenate(adata[1:], batch_key="batch", uns_merge="same")
+        adata = adata_raw[0].concatenate(adata_raw[1:], batch_key="batch", uns_merge="same")
         batch_idx = LabelEncoder().fit_transform(adata.obs["batch"])
+    del adata_raw
 
     if batch_idx is not None and not CFG.pp.ignore_batch:
         logger.info(f"Detected {np.unique(batch_idx).shape[0]} batches.")
@@ -47,7 +49,7 @@ def omics_data_process(
 
     if not preprocess:
         logger.warning("Skip preprocessing steps, only for advanced users.")
-        return adata.copy(), batch_idx
+        return adata.X.astype(np.float32), adata.obsm["spatial"], batch_idx
 
     logger.info(f"Preprocessing {adata.n_obs} cells.")
     start_time = time.time()
@@ -79,4 +81,4 @@ def omics_data_process(
     sc.pp.log1p(adata)
     sc.pp.scale(adata, max_value=10)
     logger.success(f"Preprocessing finished in {time.time() - start_time:.2f} seconds.")
-    return adata.copy(), batch_idx
+    return adata.X.astype(np.float32), adata.obsm["spatial"], batch_idx
