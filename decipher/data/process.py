@@ -79,6 +79,20 @@ def omics_data_process(
     # data normalization and scaling
     sc.pp.normalize_total(adata, target_sum=1e4)
     sc.pp.log1p(adata)
-    sc.pp.scale(adata, max_value=10)
+    # NOTE: we found per-batch scaling is necessary to find more knn pairs
+    if batch_idx is not None and not CFG.pp.ignore_batch:
+        logger.info("Per batch scaling.")
+        gene_idx = np.arange(adata.n_vars)
+        batch_name = np.unique(adata.obs["_batch"].values)
+        adatas = [adata[adata.obs["_batch"] == i] for i in batch_name]
+        for i, ad in enumerate(adatas):
+            ad = ad[:, gene_idx]
+            sc.pp.scale(ad)
+            adatas[i] = ad
+        adata = adatas[0].concatenate(adatas[1:], batch_key="_batch")
+        del adatas
+        adata.obs["_batch"] = adata.obs["_batch"].astype(int)
+    else:
+        sc.pp.scale(adata, max_value=10)
     logger.success(f"Preprocessing finished in {time.time() - start_time:.2f} seconds.")
     return adata.X.astype(np.float32), adata.obsm["spatial"], batch_idx

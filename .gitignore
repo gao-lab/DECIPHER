@@ -82,6 +82,7 @@ tests/data/*
 experiments/data/*
 experiments/**/*.yaml
 **/explain/**.yaml
+data
 
 # exclude
 !resource/README.md

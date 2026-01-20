@@ -1,3 +1,6 @@
+r"""
+Layers for neural networks
+"""
 import torch
 from einops import repeat
 from torch import Tensor, nn

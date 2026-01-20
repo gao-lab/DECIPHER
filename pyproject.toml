@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "cell-decipher"
 packages = [{include = "decipher"}]
-version = "0.3.1"
+version = "0.3.2"
 description = "DECIPHER for learning disentangled cellular embeddings in large-scale heterogeneous spatial omics data"
 readme = "README.md"
 license = "MIT"
@@ -36,6 +36,7 @@ pip = "*"
 scanpy = ">=1.9"
 pyyaml = "*"
 scikit-misc = ">=0.3"
+scikit-learn = "<1.6"
 leidenalg = "*"
 loguru = "*"
 ray = {version = "*", extras = ["default"]}

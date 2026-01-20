@@ -26,7 +26,7 @@ def get_lr_expr(
     We multiply mean ligand expression in given radius and receptor expression in the cell as the activity of a ligand-receptor pair.
 
     Args:
-        adata: AnnData object
+        adata: AnnData object, adata.X is log-norm data
         lr_df: Ligand receptor pairs, must contain columns `ligand.symbol` and `receptor.symbol`
         radius: float radius for valid ligand
         aggr: str aggregation method of ligand expression, default is `mean`

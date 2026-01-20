@@ -5,10 +5,11 @@
 [![license-badge](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![PyPI](https://img.shields.io/pypi/v/cell-decipher?label=pypi)
 ![Python 3.10](https://img.shields.io/badge/python->=3.10-blue.svg)
-
 <!-- [![codecov](https://codecov.io/gh/gao-lab/DECIPHER/graph/badge.svg?token=zgwG4u9v0F)](https://codecov.io/gh/gao-lab/DECIPHER) -->
 
-# DECIPHER
+<!-- ![DECIPHER](./docs/_static/DECIPHER.png|size=22) -->
+<img src="./docs/_static/DECIPHER.png" width="200">
+
 <div align="center">
 
 [Installation](#Installation) • [Documentation](#Documentation) • [Citation](#Citation) • [FAQ](#FAQ) • [Acknowledgement](#Acknowledgement)
@@ -31,16 +32,16 @@ Please check our paper *DECIPHER for learning disentangled cellular embeddings i
 We recommend to install `cell-decipher` to a new conda environment:
 
 ```sh
-mamba create -n decipher python==3.11 -c conda-forge -y && conda activate decipher
-pip install cell-decipher
+conda create -n decipher -c conda-forge python==3.11 uv -y && conda activate decipher
+uv pip install cell-decipher
 install_pyg_dependencies
 ```
 
 (Optional) You can install [RAPIDS](https://docs.rapids.ai/install) to accelerate visualization.
 
 ```sh
-mamba create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=25.06 'cuda-version>=12.0,<=12.8' -y && conda activate decipher
-pip install cell-decipher
+conda create -n decipher -c conda-forge -c rapidsai -c nvidia python=3.11 rapids=25.06 uv 'cuda-version>=12.0,<=12.8' -y && conda activate decipher
+uv pip install cell-decipher
 install_pyg_dependencies
 ```
 

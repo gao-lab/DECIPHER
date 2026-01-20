@@ -1,3 +1,6 @@
+r"""
+Core embedding models
+"""
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -98,6 +101,6 @@ def load_model(dir: str, model_cfg, spatial: bool = False) -> ScSimCLR | Spatial
     # sort by modification time
     model_path = sorted(Path(dir).glob("*.ckpt"), key=os.path.getmtime)[-1]
     logger.info(f"Loading model from {model_path}")
-    model = model_cls.load_from_checkpoint(model_path, config=model_cfg)
+    model = model_cls.load_from_checkpoint(model_path, config=model_cfg, weights_only=False)
     logger.success(f"Pre-trained model loaded from {model_path}.")
     return model

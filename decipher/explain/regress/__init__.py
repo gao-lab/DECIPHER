@@ -1,0 +1,3 @@
+r"""
+Regression module
+"""
